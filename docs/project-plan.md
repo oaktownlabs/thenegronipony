@@ -675,14 +675,130 @@ Create the source-controlled home for the project.
 - Record short intro video: “This is our first Oaktown Labs project.”
 - Capture the horse reveal separately.
 
-### Milestone 1 — Object Assessment and Scanning
+### Milestone 1 — Website Design and Launch Narrative
 
 #### Goal
 
-Digitally preserve the original horse before modification.
+Begin with the end in mind by designing the public project page, content
+structure, and launch narrative before the next lab session.
 
 #### Tasks
 
+- [ ] Define Oaktown Labs site direction.
+- [ ] Design The Negroni Pony project page structure.
+- [ ] Draft homepage and project-page copy.
+- [ ] Define build-log content types.
+- [ ] Define recipe, calibration, CAD, firmware, and media sections.
+- [ ] Create placeholder page content for current known facts.
+- [ ] Identify missing media required for launch.
+- [ ] Create a site implementation plan.
+
+#### Deliverables
+
+- `site/`
+- `site/content/negroni-pony/`
+- `docs/site-plan.md`
+- Initial project-page copy
+- Launch narrative outline
+
+#### Media Capture Planning
+
+- Hero video requirements.
+- Horse reveal shot list.
+- Calibration chart concepts.
+- “Powered by Codex” section requirements.
+- Open-source artifact checklist.
+
+### Milestone 2 — Calibration Harness Design
+
+#### Goal
+
+Design the pump calibration workflow and bench harness before returning to the
+lab.
+
+#### Tasks
+
+- [ ] Select pump candidates.
+- [ ] Select tubing candidates.
+- [ ] Define calibration fixture requirements.
+- [ ] Define bottle, tube, pump, cup, and scale layout.
+- [ ] Define calibration CSV schema.
+- [ ] Draft calibration procedure.
+- [ ] Draft repeatability and anti-drip test procedure.
+- [ ] Draft flush and cleaning validation procedure.
+- [ ] Identify parts or tools needed before lab calibration.
+- [ ] Plan calibration photos and video shots.
+
+#### Deliverables
+
+- `docs/fluid-system.md`
+- `docs/pump-calibration.md`
+- `docs/calibration-harness.md`
+- `data/calibration/`
+- `scripts/calibration/`
+- Calibration data template
+
+#### Media Capture Planning
+
+- Scale calibration setup.
+- Pump and tubing layout.
+- Anti-drip test framing.
+- “The horse demands calibration” chart concept.
+
+### Milestone 3 — Pump Bench Calibration
+
+#### Goal
+
+Validate three-pump cocktail dispensing outside the sculpture once lab access is
+available.
+
+#### Entry Criteria
+
+- Calibration harness plan complete.
+- Pump and tubing candidates selected.
+- Scale and test vessels available.
+- Calibration data schema ready.
+
+#### Tasks
+
+- [ ] Build bench rig.
+- [ ] Run water tests.
+- [ ] Run alcohol-safe fluid tests.
+- [ ] Test recipe ingredients.
+- [ ] Measure flow rates.
+- [ ] Test repeatability.
+- [ ] Test anti-drip pump reversal.
+- [ ] Test tube priming.
+- [ ] Test flush process.
+- [ ] Record calibration data.
+- [ ] Generate first calibration charts.
+
+#### Deliverables
+
+- Completed calibration datasets in `data/calibration/`
+- Calibration scripts in `scripts/calibration/`
+- First calibration charts
+- `docs/pump-calibration.md` updated with results
+
+#### Media Capture
+
+- First pump running.
+- Three pumps running together.
+- Scale calibration setup.
+- Ingredient calibration data.
+- Anti-drip failures.
+- “This is how much engineering it takes to make a horse sneeze a cocktail.”
+
+### Milestone 4 — Object Assessment, Scanning, and Filming Plan
+
+#### Goal
+
+Measure, film, and digitally preserve the original horse before modification.
+
+#### Tasks
+
+- [ ] Create art measurement plan.
+- [ ] Create filming and shot plan for the sculpture.
 - [ ] Photograph horse and lake base.
 - [ ] Measure object.
 - [ ] Inspect underside and seams.
@@ -700,6 +816,8 @@ Digitally preserve the original horse before modification.
 - `docs/object-assessment.md`
 - `docs/scanning-plan.md`
 - `docs/scan-results.md`
+- `docs/art-measurement-plan.md`
+- `docs/filming-plan.md`
 - `scans/raw/`
 - `scans/processed/`
 - `cad/nostril-test-piece/`
@@ -708,49 +826,13 @@ Digitally preserve the original horse before modification.
 
 - Hero shots of the gold horse.
 - Close-up nostril shots.
+- Base and lake detail shots.
+- Measurement setup.
 - “Before we drill the horse’s nose, we scan the horse.”
 - Screen recording of scan processing.
 - Bad scan results if funny.
 
-### Milestone 2 — Pump Bench Prototype
-
-#### Goal
-
-Validate three-pump cocktail dispensing outside the sculpture.
-
-#### Tasks
-
-- [ ] Select pump candidates.
-- [ ] Select tubing candidates.
-- [ ] Build bench rig.
-- [ ] Run water tests.
-- [ ] Run alcohol-safe fluid tests.
-- [ ] Test actual Negroni ingredients.
-- [ ] Measure flow rates.
-- [ ] Test repeatability.
-- [ ] Test anti-drip pump reversal.
-- [ ] Test tube priming.
-- [ ] Test flush process.
-- [ ] Record calibration data.
-
-#### Deliverables
-
-- `docs/fluid-system.md`
-- `docs/pump-calibration.md`
-- `data/calibration/`
-- `scripts/calibration/`
-- First calibration charts
-
-#### Media Capture
-
-- First pump running.
-- Three pumps running together.
-- Scale calibration setup.
-- Campari calibration data.
-- Anti-drip failures.
-- “This is how much engineering it takes to make a horse sneeze a Negroni.”
-
-### Milestone 3 — Firmware Breadboard Prototype
+### Milestone 5 — Firmware Breadboard Prototype
 
 #### Goal
 
@@ -784,7 +866,7 @@ Control the three pumps reliably with recipe logic.
 - Terminal/debug output if visually interesting.
 - “Powered by Codex” workflow clips.
 
-### Milestone 4 — Horse Base UI and Lighting Prototype
+### Milestone 6 — Horse Base UI and Lighting Prototype
 
 #### Goal
 
@@ -817,7 +899,7 @@ Prototype the user-facing controls and lake glow.
 - “PONY POUR” label experiments.
 - Serious UI for unserious purpose.
 
-### Milestone 5 — Nostril Nozzle Prototype
+### Milestone 7 — Nostril Nozzle Prototype
 
 #### Goal
 
@@ -851,7 +933,7 @@ Design and validate the tube interface before drilling the original.
 - Dad-joke title card: “Nostril Nozzle R&D.”
 - Failure closeups.
 
-### Milestone 6 — Sidecar Design and Fabrication
+### Milestone 8 — Sidecar Design and Fabrication
 
 #### Goal
 
@@ -888,7 +970,7 @@ Build the tasteful lab-equipment sidecar.
 - Tubing routing.
 - Sidecar glamour shot.
 
-### Milestone 7 — Glass Recess Prototype
+### Milestone 9 — Glass Recess Prototype
 
 #### Goal
 
@@ -917,7 +999,7 @@ Create the rocks glass placement system in the lake base.
 - Pour alignment tests.
 - Absurdly serious “glass landing zone” language.
 
-### Milestone 8 — Drill the Original
+### Milestone 10 — Drill the Original
 
 #### Goal
 
@@ -956,7 +1038,7 @@ Modify the original horse for the real pour path.
 - Nozzle fit.
 - First water-through-nostril moment.
 
-### Milestone 9 — Integrated Prototype
+### Milestone 11 — Integrated Prototype
 
 #### Goal
 
@@ -991,7 +1073,7 @@ Connect horse, sidecar, UI, lighting, pumps, and firmware.
 - Cleaning reality.
 - “This should not work, but it does.”
 
-### Milestone 10 — PCB Design
+### Milestone 12 — PCB Design
 
 #### Goal
 
@@ -1029,41 +1111,7 @@ Replace breadboard wiring with a cleaner, reproducible board.
 - Smoke test.
 - “Yes, we made a PCB for the horse.”
 
-### Milestone 11 — Oaktown Labs Site
-
-#### Goal
-
-Create the complete public home for the project.
-
-#### Site Requirements
-
-- Oaktown Labs identity
-- The Negroni Pony project page
-- Hero video
-- Project summary
-- Build timeline
-- Open-source repo link
-- Calibration charts
-- PCB preview
-- CAD previews
-- Photo/video gallery
-- “Powered by Codex” section
-- Mailing list
-- Social links
-- Future project archive structure
-
-#### Deliverables
-
-- `site/`
-- `site/content/negroni-pony/`
-- `docs/site-plan.md`
-
-#### Homepage Copy Direction
-
-> Oaktown Labs builds over-engineered fun with good taste.  
-> First project: a gold horse that pours Negronis through its nostril.
-
-### Milestone 12 — Launch Package
+### Milestone 13 — Launch Package
 
 #### Goal
 
@@ -1239,17 +1287,20 @@ Create `docs/risk-register.md` with risks grouped by:
 - Open-source/legal
 - Transport
 
-### Task 4 — Create Calibration Data Schema
-
-Create a CSV schema for pump calibration data and a Markdown doc explaining how calibration runs should be recorded.
-
-### Task 5 — Create Site Skeleton
+### Task 4 — Create Site Skeleton
 
 Create a simple Oaktown Labs static site with a placeholder Negroni Pony project page, mailing list placeholder, and build-log structure.
 
-### Task 6 — Create Media Capture Templates
+### Task 5 — Create Calibration Harness Plan
 
-Create templates for build notes, shot lists, and milestone retrospectives.
+Create a CSV schema for pump calibration data, a Markdown doc explaining how
+calibration runs should be recorded, and a bench-harness plan for pump layout,
+scale placement, vessels, tubing, and media capture.
+
+### Task 6 — Create Art Measurement and Media Capture Templates
+
+Create templates for build notes, shot lists, sculpture measurement, filming,
+and milestone retrospectives.
 
 ## 21. Definition of Done for V1
 

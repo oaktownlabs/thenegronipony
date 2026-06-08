@@ -2,6 +2,22 @@
 
 This file tracks important project decisions. Add entries newest first.
 
+## 2026-06-08 - Move site and calibration planning before lab work
+
+Status: Accepted
+
+Context: Adam will be away from the lab for a week, so the next work should
+prioritize tasks that can be done without physical access while still improving
+the project direction.
+
+Decision: Move website design and launch narrative to Milestone 1, calibration
+harness design to Milestone 2, lab pump calibration to Milestone 3, and object
+assessment/scanning/filming to Milestone 4.
+
+Consequences: The project begins with the intended public artifact and uses the
+away-from-lab window to plan the calibration rig. Physical sculpture measurement,
+filming, scanning, and actual calibration resume when lab access is available.
+
 ## 2026-06-08 - Establish Milestone 0 repo skeleton
 
 Status: Accepted
