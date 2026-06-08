@@ -1,0 +1,7 @@
+pre-commit:
+  commands:
+    check:
+      files: git diff --name-only HEAD
+      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}"
+      run: npx @biomejs/biome check --write --no-errors-on-unmatched --files-ignore-unknown=true --colors=off {staged_files}
+      stage_fixed: true

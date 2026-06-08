@@ -1,0 +1,45 @@
+{
+  "name": "thenegronipony",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The Negroni Pony open-source cocktail art machine.",
+  "type": "module",
+  "engines": {
+    "node": "22",
+    "pnpm": "10"
+  },
+  "packageManager": "pnpm@10.11.0",
+  "scripts": {
+    "dev": "cd site && ../node_modules/.bin/vite dev --port 5310",
+    "build": "cd site && ../node_modules/.bin/vite build",
+    "biome": "biome check . --write",
+    "lint": "biome check .",
+    "test": "vitest run --passWithNoTests",
+    "typecheck": "cd site && ../node_modules/.bin/react-router typegen && cd .. && tsc -p site/tsconfig.json --noEmit",
+    "needful": "pnpm biome && pnpm typecheck && pnpm build && pnpm test",
+    "cloudflare:deploy": "pnpm build && wrangler deploy --config site/wrangler.jsonc --env production"
+  },
+  "dependencies": {
+    "@react-router/node": "7.11.0",
+    "clsx": "2.1.1",
+    "isbot": "5.1.31",
+    "lucide-react": "0.562.0",
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "react-router": "7.11.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.3.11",
+    "@react-router/dev": "7.11.0",
+    "@tailwindcss/vite": "4.1.16",
+    "@types/node": "22.8.6",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2",
+    "lefthook": "1.11.13",
+    "tailwindcss": "4.1.16",
+    "typescript": "5.8.3",
+    "vite": "6.3.3",
+    "wrangler": "4.32.0",
+    "vitest": "3.2.4"
+  }
+}
