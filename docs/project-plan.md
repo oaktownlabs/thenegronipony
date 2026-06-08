@@ -66,7 +66,7 @@ The launch experience should feel like discovering that someone quietly built an
 - Build a working three-pump cocktail art machine.
 - Preserve and modify the original horse sculpture if possible.
 - Dispense cocktails through the horse’s nostril.
-- Support one-to-three ingredient alcohol-only recipes.
+- Support one-to-three ingredient recipes with explicit pump volumes.
 - Use a physical recipe selector, small display, and large pour button.
 - Put the rocks glass into the lake base.
 - Make the lake glow theatrically.
@@ -268,38 +268,32 @@ The public artifact should include:
 
 The fluid system uses three pumps and three bottles.
 
-Initial bottle mapping:
+Initial recipes are tracked in `docs/recipes.md` and
+`firmware/config/recipes.yaml`.
 
-| Pump | Ingredient |
-|---|---|
-| Pump A | Gin |
-| Pump B | Campari |
-| Pump C | Sweet vermouth |
-
-Initial default recipe:
-
-| Recipe | Pump A | Pump B | Pump C |
-|---|---:|---:|---:|
-| Negroni | 1 part | 1 part | 1 part |
+All initial recipes target a 200 ml pour.
 
 V1 recipe constraints:
 
-- Alcohol-only liquids
+- One-to-three pumpable ingredients per recipe
 - No dairy
 - No citrus pulp
-- No juices
-- No syrups unless later validated
+- Juices, sour mix, syrups, espresso, and carbonated mixers require validation
+  before they are treated as reliable party-mode ingredients
 - No ice automation
 - No stirring
 - No shaking
 
-Candidate recipes:
+Initial recipe catalog:
 
-- Negroni
-- Boulevardier
-- Manhattan-ish
-- Martini-ish
-- Single-spirit Pony Shot
+| Recipe | Ratio | Target Pour |
+|---|---|---:|
+| California Negroni | 6 St. George Gin / 5 Antica Formula Vermouth / 3 Bruto Americano | 200 ml |
+| Pony Espresso Martini | 2 Hanger One Vodka / 1 Kahlua / 1 Espresso | 200 ml |
+| Old Pal | 1 Michter's Rye / 1 Antica Formula Vermouth / 1 Bruto Americano | 200 ml |
+| Mare-garita | 6 Mescal / 4 Grand Marnier / 3 Sour mix | 200 ml |
+| Moscow Mule | 2 Hanger One Vodka / 4 Ginger beer / 1 Lime juice | 200 ml |
+| Kentucky Derby Julep | 4 Woodford Reserve / 1 Syrup | 200 ml |
 
 ### 9.2 Electronics System
 

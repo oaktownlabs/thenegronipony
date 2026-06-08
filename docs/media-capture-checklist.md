@@ -33,7 +33,7 @@ Capture generously during private build so launch can reveal a complete artifact
 - [ ] Three pumps running together.
 - [ ] Scale calibration setup.
 - [ ] Water test.
-- [ ] Negroni ingredient test.
+- [ ] Recipe ingredient tests.
 - [ ] Anti-drip failures.
 - [ ] Calibration chart or data visual.
 

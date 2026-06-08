@@ -1,0 +1,82 @@
+version: 1
+units:
+  volume: ml
+target_pour_ml: 200.0
+rounding:
+  displayed_decimal_places: 1
+recipes:
+  - id: california_negroni
+    name: California Negroni
+    ratio_total_parts: 14
+    ingredients:
+      - name: St. George Gin
+        ratio_parts: 6
+        volume_ml: 85.7
+      - name: Antica Formula Vermouth
+        ratio_parts: 5
+        volume_ml: 71.4
+      - name: Bruto Americano
+        ratio_parts: 3
+        volume_ml: 42.9
+  - id: pony_espresso_martini
+    name: Pony Espresso Martini
+    ratio_total_parts: 4
+    ingredients:
+      - name: Hanger One Vodka
+        ratio_parts: 2
+        volume_ml: 100.0
+      - name: Kahlua
+        ratio_parts: 1
+        volume_ml: 50.0
+      - name: Espresso
+        ratio_parts: 1
+        volume_ml: 50.0
+  - id: old_pal
+    name: Old Pal
+    ratio_total_parts: 3
+    ingredients:
+      - name: Michter's Rye
+        ratio_parts: 1
+        volume_ml: 66.7
+      - name: Antica Formula Vermouth
+        ratio_parts: 1
+        volume_ml: 66.7
+      - name: Bruto Americano
+        ratio_parts: 1
+        volume_ml: 66.7
+  - id: mare_garita
+    name: Mare-garita
+    ratio_total_parts: 13
+    ingredients:
+      - name: Mescal
+        ratio_parts: 6
+        volume_ml: 92.3
+      - name: Grand Marnier
+        ratio_parts: 4
+        volume_ml: 61.5
+      - name: Sour mix
+        ratio_parts: 3
+        volume_ml: 46.2
+  - id: moscow_mule
+    name: Moscow Mule
+    ratio_total_parts: 7
+    ingredients:
+      - name: Hanger One Vodka
+        ratio_parts: 2
+        volume_ml: 57.1
+      - name: Ginger beer
+        ratio_parts: 4
+        volume_ml: 114.3
+      - name: Lime juice
+        ratio_parts: 1
+        volume_ml: 28.6
+  - id: kentucky_derby_julep
+    name: Kentucky Derby Julep
+    ratio_total_parts: 5
+    ingredients:
+      - name: Woodford Reserve
+        ratio_parts: 4
+        volume_ml: 160.0
+      - name: Syrup
+        ratio_parts: 1
+        volume_ml: 40.0

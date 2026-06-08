@@ -12,7 +12,8 @@ The tone is over-engineered fun with good taste.
 
 ## V1 Scope
 
-- Three-pump alcohol-only cocktail dispensing.
+- One-to-three ingredient cocktail dispensing with recipe volumes tracked in
+  `firmware/config/recipes.yaml`.
 - Rocks-glass placement in the lake base.
 - Recipe selector, small screen, large pour button, and theatrical lake/status
   lighting on the horse/lake module.
@@ -21,6 +22,8 @@ The tone is over-engineered fun with good taste.
 - Scanning before any irreversible sculpture modification.
 - Open-source docs, firmware, CAD, calibration data, site, scripts, and build
   notes.
+
+The initial recipe catalog is documented in [docs/recipes.md](docs/recipes.md).
 
 ## Current Status
 
