@@ -19,8 +19,9 @@ Options considered:
 
 Decision: Use React Router v7 framework mode with `ssr: false`, Vite, Tailwind
 CSS v4, and Wrangler static assets deployment to Cloudflare. Keep site source
-and config in `site/`, while package dependencies and scripts live at the repo
-root.
+and Vite/React Router config in `site/`, while package dependencies, scripts,
+and `wrangler.jsonc` live at the repo root so Cloudflare can find deployment
+configuration by default.
 
 Consequences: The site can be built as static assets for Cloudflare and can grow
 route-by-route as future milestones add content. Server routes and SSR-specific

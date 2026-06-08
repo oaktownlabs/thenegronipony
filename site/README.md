@@ -2,8 +2,8 @@
 
 The public project site source and launch content lives here.
 
-The site is a static React Router v7 app built with Vite and Tailwind CSS. It is
-configured for Cloudflare static assets deployment through `wrangler.jsonc`.
+The site is a static React Router v7 app built with Vite and Tailwind CSS. The
+root `wrangler.jsonc` config points Cloudflare at `site/build/client`.
 
 ## Commands
 
@@ -13,6 +13,7 @@ From the repository root:
 - `pnpm build` - build the static site.
 - `pnpm typecheck` - generate React Router types and run TypeScript.
 - `pnpm cloudflare:deploy` - build and deploy the static assets to Cloudflare.
+- `pnpm cloudflare:preview` - build and upload a Cloudflare preview version.
 
 ## Content Shape
 

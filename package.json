@@ -17,7 +17,8 @@
     "test": "vitest run --passWithNoTests",
     "typecheck": "cd site && ../node_modules/.bin/react-router typegen && cd .. && tsc -p site/tsconfig.json --noEmit",
     "needful": "pnpm biome && pnpm typecheck && pnpm build && pnpm test",
-    "cloudflare:deploy": "pnpm build && wrangler deploy --config site/wrangler.jsonc --env production"
+    "cloudflare:deploy": "pnpm build && wrangler deploy",
+    "cloudflare:preview": "pnpm build && wrangler versions upload"
   },
   "dependencies": {
     "@react-router/node": "7.11.0",

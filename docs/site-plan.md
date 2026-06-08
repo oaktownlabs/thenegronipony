@@ -15,11 +15,21 @@ claiming facts that have not been measured.
 - React Router v7 framework mode with SSR disabled.
 - Vite for local dev and production builds.
 - Tailwind CSS v4 through the Vite plugin.
-- Wrangler static assets deployment to Cloudflare.
+- Root `wrangler.jsonc` for Cloudflare static assets deployment.
 - Cloudflare serves `site/build/client` with single-page-app fallback.
 
 The site does not need SSR, server actions, API routes, authentication, or
 runtime database access for Milestone 1.
+
+## Cloudflare Build Settings
+
+Use the repository root as the Cloudflare project root so Wrangler is discovered
+automatically.
+
+- Build command: `pnpm build`
+- Production deploy command: `wrangler deploy`
+- Preview deploy command: `wrangler versions upload`
+- Static assets directory in `wrangler.jsonc`: `./site/build/client`
 
 ## Current Pages
 
@@ -53,5 +63,6 @@ runtime database access for Milestone 1.
 - The site can run locally with `pnpm dev`.
 - The site builds with `pnpm build`.
 - Type generation and TypeScript checks pass with `pnpm typecheck`.
-- Cloudflare deployment config exists and points at the static build output.
+- Cloudflare deployment config exists at the repo root and points at the static
+  build output.
 - Placeholder pages exist for future launch content.
