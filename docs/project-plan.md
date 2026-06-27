@@ -887,6 +887,11 @@ Control the three pumps reliably with recipe logic.
 
 ### Milestone 6 — Horse Base UI and Lighting Prototype
 
+Status: Partially in review via Milestone 6 PR. UI states and lake lighting
+behaviors are drafted; selector, screen, pour-button, lighting hardware, control
+placement, and off-sculpture prototype tests are blocked on Adam/hardware.
+Blocker issue: https://github.com/oaktownlabs/thenegronipony/issues/11
+
 #### Goal
 
 Prototype the user-facing controls and lake glow.
@@ -897,7 +902,7 @@ Prototype the user-facing controls and lake glow.
 - [ ] Select small screen.
 - [ ] Select pour button.
 - [ ] Prototype lake lighting.
-- [ ] Define UI states.
+- [x] Define UI states.
 - [ ] Test controls off-sculpture.
 - [ ] Decide control placement on base.
 - [ ] Decide wiring route to sidecar.
