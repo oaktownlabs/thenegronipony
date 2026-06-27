@@ -1086,6 +1086,11 @@ Modify the original horse for the real pour path.
 
 ### Milestone 11 — Integrated Prototype
 
+Status: Planning in review via Milestone 11 PR. Integration and cleaning plans
+exist; full-system assembly and tests are blocked on sidecar, firmware, UI,
+lighting, glass recess, drilled/nozzle path, and calibration completion.
+Blocker issue: https://github.com/oaktownlabs/thenegronipony/issues/21
+
 #### Goal
 
 Connect horse, sidecar, UI, lighting, pumps, and firmware.
