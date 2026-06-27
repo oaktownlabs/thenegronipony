@@ -750,6 +750,11 @@ lab.
 
 ### Milestone 3 — Pump Bench Calibration
 
+Status: Blocked on lab execution. The calibration schema and harness plan are
+ready in Milestone 2, but this milestone requires physical pumps, tubing, scale,
+test vessels, and measured trial data from Adam/lab work. Blocker issue:
+https://github.com/oaktownlabs/thenegronipony/issues/4
+
 #### Goal
 
 Validate three-pump cocktail dispensing outside the sculpture once lab access is
