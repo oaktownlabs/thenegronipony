@@ -847,6 +847,12 @@ Measure, film, and digitally preserve the original horse before modification.
 
 ### Milestone 5 — Firmware Breadboard Prototype
 
+Status: Partially in review via Milestone 5 PR. Hardware-agnostic recipe,
+calibration, anti-drip, prime, and flush sequencing logic has tests. Breadboard
+wiring and controller-specific firmware are blocked on electronics selection and
+physical pump-driver hardware. Blocker issue:
+https://github.com/oaktownlabs/thenegronipony/issues/9
+
 #### Goal
 
 Control the three pumps reliably with recipe logic.
@@ -855,15 +861,15 @@ Control the three pumps reliably with recipe logic.
 
 - [ ] Select controller.
 - [ ] Wire pump drivers.
-- [ ] Add recipe model.
-- [ ] Add pump calibration constants.
-- [ ] Add pour sequence.
-- [ ] Add prime mode.
-- [ ] Add flush mode.
-- [ ] Add anti-drip mode.
+- [x] Add recipe model.
+- [x] Add pump calibration constants.
+- [x] Add pour sequence.
+- [x] Add prime mode.
+- [x] Add flush mode.
+- [x] Add anti-drip mode.
 - [ ] Add state machine for UI.
 - [ ] Add serial/debug logging.
-- [ ] Add tests where practical.
+- [x] Add tests where practical.
 
 #### Deliverables
 
