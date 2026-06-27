@@ -966,6 +966,11 @@ Design and validate the tube interface before drilling the original.
 
 ### Milestone 8 — Sidecar Design and Fabrication
 
+Status: Planning in review via Milestone 8 PR. Sidecar design principles and
+prototype sequence are drafted; layout, material choice, fabrication, pump/bottle
+mounting, and water tests are blocked on selected pump/tubing hardware and Adam
+lab work. Blocker issue: https://github.com/oaktownlabs/thenegronipony/issues/15
+
 #### Goal
 
 Build the tasteful lab-equipment sidecar.
