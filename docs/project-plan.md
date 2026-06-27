@@ -1170,6 +1170,12 @@ Replace breadboard wiring with a cleaner, reproducible board.
 
 ### Milestone 13 — Launch Package
 
+Status: Planning in review via Milestone 13 PR. Launch checklist, release-notes
+placeholder, and media directory notes exist; final launch is blocked on
+completed build, reviewed docs, final media, license review, site completion,
+and publication approval. Blocker issue:
+https://github.com/oaktownlabs/thenegronipony/issues/25
+
 #### Goal
 
 Prepare the public release as a complete artifact.
