@@ -799,14 +799,19 @@ available.
 
 ### Milestone 4 — Object Assessment, Scanning, and Filming Plan
 
+Status: Partially in review via Milestone 4 PR. Planning templates are ready;
+physical photos, measurements, material inspection, scans, and mesh extraction
+are blocked on Adam/lab access. Blocker issue:
+https://github.com/oaktownlabs/thenegronipony/issues/7
+
 #### Goal
 
 Measure, film, and digitally preserve the original horse before modification.
 
 #### Tasks
 
-- [ ] Create art measurement plan.
-- [ ] Create filming and shot plan for the sculpture.
+- [x] Create art measurement plan.
+- [x] Create filming and shot plan for the sculpture.
 - [ ] Photograph horse and lake base.
 - [ ] Measure object.
 - [ ] Inspect underside and seams.
@@ -817,7 +822,7 @@ Measure, film, and digitally preserve the original horse before modification.
 - [ ] Archive raw scan files.
 - [ ] Create cleaned working mesh.
 - [ ] Extract nostril test section.
-- [ ] Create scan notes.
+- [x] Create scan notes.
 
 #### Deliverables
 

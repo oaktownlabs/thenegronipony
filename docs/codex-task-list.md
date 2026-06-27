@@ -10,9 +10,9 @@ This list seeds the next Codex-driven work after Milestone 0.
 - [x] Draft `docs/pump-calibration.md` with an initial CSV schema.
 - [x] Draft `docs/calibration-harness.md` for the bench rig, layout, tools, and shot list.
 - [x] Create initial calibration CSV templates under `data/calibration/`.
-- [ ] Draft `docs/object-assessment.md` before inspecting the horse.
-- [ ] Draft `docs/scanning-plan.md` with scan capture requirements and file naming.
-- [ ] Draft `docs/art-measurement-plan.md` and `docs/filming-plan.md`.
+- [x] Draft `docs/object-assessment.md` before inspecting the horse.
+- [x] Draft `docs/scanning-plan.md` with scan capture requirements and file naming.
+- [x] Draft `docs/art-measurement-plan.md` and `docs/filming-plan.md`.
 - [ ] Draft `docs/electronics-plan.md` after controller and pump-driver options are known.
 - [ ] Draft issue set for Milestone 1.
 
