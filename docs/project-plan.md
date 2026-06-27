@@ -925,6 +925,13 @@ Prototype the user-facing controls and lake glow.
 
 ### Milestone 7 — Nostril Nozzle Prototype
 
+Status: Planning in review via Milestone 7 PR. Design/test plan exists, but
+actual nozzle geometry, printed test section, tube fit, drilling trial, and pour
+tests are blocked on scan results and selected tubing. Blocker issues:
+https://github.com/oaktownlabs/thenegronipony/issues/7 and
+https://github.com/oaktownlabs/thenegronipony/issues/4. Prototype test issue:
+https://github.com/oaktownlabs/thenegronipony/issues/13
+
 #### Goal
 
 Design and validate the tube interface before drilling the original.
@@ -940,7 +947,7 @@ Design and validate the tube interface before drilling the original.
 - [ ] Test drip behavior.
 - [ ] Test red liquid pour.
 - [ ] Choose V1 nozzle geometry.
-- [ ] Document learnings.
+- [x] Document learnings.
 
 #### Deliverables
 
