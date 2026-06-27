@@ -1,0 +1,2 @@
+trial_id,date,operator,pump_id,pump_model,tube_material,tube_inner_diameter_mm,liquid,target_volume_ml,run_time_ms,reverse_time_ms,mass_before_g,mass_after_g,measured_volume_ml,temperature_c,primed,notes
+

@@ -711,6 +711,9 @@ structure, and launch narrative before the next lab session.
 
 ### Milestone 2 — Calibration Harness Design
 
+Status: In review via Milestone 2 PR. Planning deliverables are drafted; pump
+and tubing selection remain open pending Adam/hardware confirmation.
+
 #### Goal
 
 Design the pump calibration workflow and bench harness before returning to the
@@ -720,14 +723,14 @@ lab.
 
 - [ ] Select pump candidates.
 - [ ] Select tubing candidates.
-- [ ] Define calibration fixture requirements.
-- [ ] Define bottle, tube, pump, cup, and scale layout.
-- [ ] Define calibration CSV schema.
-- [ ] Draft calibration procedure.
-- [ ] Draft repeatability and anti-drip test procedure.
-- [ ] Draft flush and cleaning validation procedure.
+- [x] Define calibration fixture requirements.
+- [x] Define bottle, tube, pump, cup, and scale layout.
+- [x] Define calibration CSV schema.
+- [x] Draft calibration procedure.
+- [x] Draft repeatability and anti-drip test procedure.
+- [x] Draft flush and cleaning validation procedure.
 - [ ] Identify parts or tools needed before lab calibration.
-- [ ] Plan calibration photos and video shots.
+- [x] Plan calibration photos and video shots.
 
 #### Deliverables
 
