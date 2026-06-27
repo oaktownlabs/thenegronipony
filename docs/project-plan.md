@@ -1126,6 +1126,12 @@ Connect horse, sidecar, UI, lighting, pumps, and firmware.
 
 ### Milestone 12 — PCB Design
 
+Status: Blocked in review via Milestone 12 PR. PCB bring-up and assembly
+placeholders exist; schematic, layout, BOM, ordering, assembly, and smoke/load
+tests are blocked until electronics requirements are frozen from Milestones 5,
+6, 8, and 11. Blocker issue:
+https://github.com/oaktownlabs/thenegronipony/issues/23
+
 #### Goal
 
 Replace breadboard wiring with a cleaner, reproducible board.
