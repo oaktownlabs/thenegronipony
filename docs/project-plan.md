@@ -1008,6 +1008,11 @@ Build the tasteful lab-equipment sidecar.
 
 ### Milestone 9 — Glass Recess Prototype
 
+Status: Planning in review via Milestone 9 PR. Recess decision path is drafted;
+target glass selection, base measurement, physical insert prototype, alignment,
+splash, wipe-down, and original-base cutting decision are blocked on Adam/lab
+work. Blocker issue: https://github.com/oaktownlabs/thenegronipony/issues/17
+
 #### Goal
 
 Create the rocks glass placement system in the lake base.
