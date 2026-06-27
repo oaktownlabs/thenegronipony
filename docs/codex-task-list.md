@@ -13,7 +13,7 @@ This list seeds the next Codex-driven work after Milestone 0.
 - [x] Draft `docs/object-assessment.md` before inspecting the horse.
 - [x] Draft `docs/scanning-plan.md` with scan capture requirements and file naming.
 - [x] Draft `docs/art-measurement-plan.md` and `docs/filming-plan.md`.
-- [ ] Draft `docs/electronics-plan.md` after controller and pump-driver options are known.
+- [x] Draft `docs/electronics-plan.md` with explicit hardware unknowns.
 - [ ] Draft issue set for Milestone 1.
 
 ## Codex Operating Notes
