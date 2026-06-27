@@ -1042,6 +1042,11 @@ Create the rocks glass placement system in the lake base.
 
 ### Milestone 10 — Drill the Original
 
+Status: Blocked in review via Milestone 10 PR. Drilling plan and results
+placeholder exist; all physical drilling work is blocked until scan, test
+section, nozzle validation, drill strategy, and Adam risk acceptance are
+complete. Blocker issue: https://github.com/oaktownlabs/thenegronipony/issues/19
+
 #### Goal
 
 Modify the original horse for the real pour path.
