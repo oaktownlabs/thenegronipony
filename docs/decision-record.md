@@ -26,6 +26,8 @@ configuration by default.
 Consequences: The site can be built as static assets for Cloudflare and can grow
 route-by-route as future milestones add content. Server routes and SSR-specific
 Cloudflare Worker code are intentionally out of scope until a real need appears.
+The Worker name is `the-negroni-pony` to match the Cloudflare Workers Builds
+service/check name.
 
 ## 2026-06-08 - Move site and calibration planning before lab work
 

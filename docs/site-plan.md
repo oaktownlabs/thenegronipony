@@ -29,6 +29,7 @@ automatically.
 - Build command: `pnpm build`
 - Production deploy command: `wrangler deploy`
 - Preview deploy command: `wrangler versions upload`
+- Worker name in `wrangler.jsonc`: `the-negroni-pony`
 - Static assets directory in `wrangler.jsonc`: `./site/build/client`
 
 ## Current Pages
