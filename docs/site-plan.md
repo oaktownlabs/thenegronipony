@@ -16,6 +16,8 @@ claiming facts that have not been measured.
 - Vite for local dev and production builds.
 - Tailwind CSS v4 through the Vite plugin.
 - Root `wrangler.jsonc` for Cloudflare static assets deployment.
+- Cloudflare Workers Builds runs `pnpm build` before its default production or
+  preview deploy command.
 - Cloudflare serves `site/build/client` with single-page-app fallback.
 
 The site does not need SSR, server actions, API routes, authentication, or
@@ -26,11 +28,17 @@ runtime database access for Milestone 1.
 Use the repository root as the Cloudflare project root so Wrangler is discovered
 automatically.
 
+- Root directory: `/`
 - Build command: `pnpm build`
-- Production deploy command: `wrangler deploy`
-- Preview deploy command: `wrangler versions upload`
+- Production deploy command: `npx wrangler deploy`
+- Preview deploy command: `npx wrangler versions upload`
 - Worker name in `wrangler.jsonc`: `the-negroni-pony`
+- Preview URLs in `wrangler.jsonc`: enabled
 - Static assets directory in `wrangler.jsonc`: `./site/build/client`
+
+Workers Builds does not honor Wrangler custom build commands, so the build step
+must be configured in the Worker's build settings. The default deploy commands
+then discover the root `wrangler.jsonc` without extra flags.
 
 ## Current Pages
 
