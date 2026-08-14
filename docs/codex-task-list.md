@@ -4,8 +4,8 @@ This list seeds the next Codex-driven work after Milestone 0.
 
 ## Ready Next
 
-- [ ] Draft `docs/site-plan.md` for the Oaktown Labs site and Negroni Pony project page.
-- [ ] Create a simple site skeleton under `site/` with placeholder project content.
+- [x] Draft `docs/site-plan.md` for the Oaktown Labs site and Negroni Pony project page.
+- [x] Create a simple site skeleton under `site/` with placeholder project content.
 - [ ] Draft `docs/fluid-system.md` with V1 fluid-path assumptions and open questions.
 - [ ] Draft `docs/pump-calibration.md` with an initial CSV schema.
 - [ ] Draft `docs/calibration-harness.md` for the bench rig, layout, tools, and shot list.
