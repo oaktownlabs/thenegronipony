@@ -1,6 +1,7 @@
 # Pump Calibration and Analysis Plan
 
-Status: Proposed for Milestone 2 review. No measured pump results exist yet.
+Status: Milestone 2 method and deterministic analysis pipeline implemented. No
+measured pump results exist yet.
 
 Calibration estimates delivered liquid from a particular physical pump,
 tubing installation, liquid, head, voltage, temperature, and control command.

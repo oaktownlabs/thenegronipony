@@ -1,6 +1,8 @@
 # Calibration Harness Build Sheet
 
-Status: Proposed for Milestone 2 review. Water-only open-bench prototype.
+Status: Milestone 2 build-sheet baseline implemented. Water-only open-bench
+prototype; received-part inspection, schematic release, and physical proof are
+still required.
 
 This fixture compares two pump models as bench specimens:
 
@@ -18,15 +20,16 @@ data model.
 
 ## Stop Before Wiring
 
-Inspect the received parts and photograph the markings. The load-cell bundle's
-product title does not prove whether each sensor is a four-wire full bridge or a
-three-wire half bridge.
+The supplied kit is SazkJere model `SJ18`, Amazon ASIN `B0B9Y584JR`. Its live
+listing describes four separate 1 kg, four-lead cantilever cells and four HX711
+modules. It maps red to `E+`, black to `E-`, green to `A+`, and white to `A-`.
+That is enough to select a one-cell/one-HX711 topology, but marketplace copy is
+not a substitute for inspecting the received parts.
 
 | Observation | Build path |
 | --- | --- |
-| One 1 kg beam sensor has four signal wires | Use one beam sensor and one HX711 for the first scale. Mount it as a cantilever. Keep the other three sets as spares. |
-| Each sensor has three wires | Use all four corner sensors through a load-cell combinator to create one full Wheatstone bridge, then use one HX711. |
-| Pin labels, wire count, or resistance do not match either path | Stop and identify the exact part before connecting excitation power. |
+| One received cell has the listed four wires and one board has matching `E+`, `E-`, `A+`, and `A-` labels | Use that one cell and one HX711. Mount the cell as a cantilever and keep the other three sets as spares. |
+| Wire count, markings, or terminal labels differ from the listing | Stop. Do not substitute a half-bridge or guessed pinout; identify the received variant before applying excitation. |
 
 Never infer the sensor pinout from wire color alone. Confirm the vendor diagram.
 Resistance measurements can help map bridge topology, but on a balanced
@@ -94,16 +97,10 @@ Do not clamp both ends of the beam to the same plate. The one-kilogram rating
 includes the platform, cylinder, and liquid. Weigh those items before choosing
 the maximum collection mass.
 
-### Four-corner alternative
-
-If the supplied sensors are three-wire half bridges:
-
-- mount four sensors at equal distances under a rigid platform;
-- orient them according to the part documentation;
-- use a load-cell combinator, not four guessed parallel connections;
-- verify corner loading with the same reference mass at the center and all four
-  corners; and
-- use one combined HX711 reading as the platform mass.
+The 100 mL cylinder is sufficient for bounded flow-curve collections. It cannot
+receive a one-shot 160 mL recipe component. Recipe duration may be computed from
+an accepted curve, but an end-to-end pour above the measured vessel cutoff needs
+a larger separately qualified catch vessel.
 
 ### Prevent false weight
 
@@ -118,20 +115,28 @@ If the supplied sensors are three-wire half bridges:
 
 ## Electrical Architecture
 
-Use an Arduino UNO R4 WiFi for the planned build. The first transport is USB;
-the Wi-Fi radio is not in the safety or timing path.
+Use the supplied Elegoo UNO R3 for the planned build. Its ATmega328P is a 5 V,
+16 MHz AVR with 2 KB SRAM. The transport is USB serial; this controller has no
+onboard Wi-Fi.
 
 ```mermaid
 flowchart TB
-  PSU["Listed regulated 12 V supply"] --> F0["Master fuse"]
-  F0 --> ESTOP["Latching emergency stop"]
-  ESTOP -. "mechanically linked auxiliary contacts" .-> INHIBIT["Hardware control inhibit<br/>separate physical re-arm"]
-  ESTOP --> FK["Kamoer branch fuse"]
-  ESTOP --> FG["Gikfun driver branch fuse"]
+  PSU["WANPTEK DPS3010U bench source"] --> F0["F0 master fuse"]
+  F0 --> K2["K2 LC1D09JD<br/>one pump-bus pole"]
+  K2 --> FK["FK Kamoer branch fuse"]
+  K2 --> FG["FG Gikfun branch fuse"]
   FK --> K["Kamoer red +12 V / black GND"]
-  FG --> H["Current-limited H-bridge"]
+  FG --> H["Pololu #4035 DRV8874<br/>PMODE low / PH-EN"]
   H --> G["Gikfun two-wire motor"]
-  USB["USB power + serial"] --> UNO["Arduino UNO R4 WiFi"]
+  F0 --> FC["FC control fuse"]
+  FC --> ES1["XB5AS8444 NC1"]
+  ES1 --> K1["K1 MY4-GS-R control relay"]
+  K1 --> K2
+  USB["USB power + 250000-baud serial"] --> UNO["Elegoo UNO R3"]
+  UNO -->|"D8 main-loop edges"| WD["CD74HC123E watchdog"]
+  WD --> K1
+  ARM["Physical ARM +<br/>D9/D10-low delay"] --> K1
+  K1 --> INHIBIT["SN74AHCT125 command inhibit"]
   UNO -->|"20 kHz, 0–5 V"| INHIBIT
   INHIBIT -->|"pump-side pull-down"| SP["Kamoer white SP"]
   UNO -->|"open-drain direction"| DIR["Kamoer green F/R"]
@@ -139,39 +144,63 @@ flowchart TB
   INHIBIT --> H
   CELL["Verified load cell"] --> HX["HX711"]
   HX --> UNO
-  ESTOP -. "auxiliary sense contact" .-> UNO
+  ES2["XB5AS8444 isolated NC2"] -. "D7 healthy loop" .-> UNO
 ```
 
-The emergency stop removes 12 V from both pumps while leaving USB power on so
-the controller can report the stop. Its mechanically linked auxiliary contacts
-also force the pump-side Kamoer `SP` low and inhibit H-bridge commands without
-firmware. This prevents an energized USB GPIO from back-powering an unpowered
-pump input and prevents release of the emergency stop from restarting a pump if
-the controller is hung. Releasing the stop does not restore the hardware enable;
-a separate physical re-arm is accepted only while firmware reports `IDLE` and
-the interlock verifies that all command outputs are physically low. Logic ground
-and 12 V ground meet at one documented star point.
+The emergency stop's NC1 contact removes both 12 V coil feeds. K1 drops, its
+seal opens, its command-gate contact disables the pump-side Kamoer `SP` and
+DRV8874 commands, and K2 removes the pump bus. USB stays powered so isolated
+NC2 can report the stop on D7. Releasing the E-stop cannot reseal K1. The
+operator must press the separate ARM button after the external logic has seen
+D9 and D10 continuously low. D8 does not statically enable K1: its rising edges
+are inverted into falling-edge triggers for a `CD74HC123E`; lost edges expire its
+output and drop K1. Logic ground and 12 V ground meet at one documented star
+point. This layered circuit is a custom fail-off prototype, not a certified
+safety function.
+
+The point-to-point construction netlist, exact orderable parts, off-state
+checks, and measurement-gated ratings are in
+[`electronics/calibration-bench-bom.md`](../electronics/calibration-bench-bom.md).
 
 ### Proposed pin allocation
 
 This table is a firmware contract, not permission to wire unverified hardware.
 
-| UNO R4 pin | Function | Interface note |
+| UNO R3 pin | Function | Interface note |
 | --- | --- | --- |
 | D4 | HX711 `DOUT` | Digital input from the one selected HX711. |
 | D5 | HX711 `SCK` | Keep low when idle; do not share with motor switching. |
-| D3 | Optional HX711 `RATE` | Only if the actual module exposes a verified rate input. Default with a hardware pull-down to 10 SPS; drive high for 80 SPS transient mode. Review/remove any board-level hard strap first. |
+| D3 | Reserved HX711 `RATE` | Do not connect in V1. The as-received module stays at its verified 10 SPS default until the board trace/strap is documented. |
 | D6 | Kamoer direction control | Drives an open-drain transistor. Do not drive the green wire high. Ground selects forward; floating selects reverse per the Kamoer sheet. |
-| D9 | Kamoer white `SP` | GPT-generated 20 kHz, 0–5 V PWM through the hardware control inhibit. Put the off-state pull-down on the pump side of that gate. |
-| D10, D11 | Gikfun H-bridge control | Logic inputs with pull-downs and hardware inhibit; exact PWM allocation depends on the selected driver module. |
+| D9 / `OC1A` | Kamoer white `SP` | Timer1 hardware PWM at 20 kHz, 0–5 V, through the hardware control inhibit. Put the off-state pull-down on the pump side of that gate. |
+| D10 / `OC1B` | Gikfun PWM | Timer1 hardware PWM at the same 20 kHz through a pull-down and the hardware inhibit. |
+| D11 | Gikfun direction | Static H-bridge command through a pull-down and the hardware inhibit; exact truth table depends on the reviewed driver carrier. |
 | D2 | Optional Kamoer yellow `FG` | Test point only until the signal voltage/type is scoped. Manufacturer states one pulse/revolution but does not specify interface voltage. |
 | D7 | Emergency-stop sense | Auxiliary low-voltage contact only; the hard stop does not depend on firmware. |
+| D8 | External control-watchdog heartbeat | Main-loop software toggles this every 25 ms only outside `boot`/`fault` with a healthy D7 loop. It feeds a retriggerable external one-shot, never a relay or pump directly. Either a HIGH or LOW stall must let K1 drop. |
+
+After received-label confirmation, connect HX711 `VCC` to the Uno 5 V rail,
+`GND` to logic ground, `DT/DOUT` to D4, and `SCK` to D5. The listing's cell map
+is red to `E+`, black to `E-`, green to `A+`, and white to `A-`; `B+`/`B-` are
+unused. Power down before changing any cell lead. Do not connect `RATE` to D3 in
+the first build.
 
 Many low-cost HX711 modules hard-wire `RATE` rather than exposing it. Trace and
-photograph the actual board before assigning D3. If 80 SPS cannot be selected
-cleanly, record that limitation and do not run or label a one-second transient
-test as 80 SPS; modify the board only under a reviewed wiring procedure or use a
-module with an accessible rate input.
+photograph this board before assigning D3. The first firmware operates at
+10 SPS. If 80 SPS cannot later be selected cleanly, record that limitation and
+do not label a short transient as 80 SPS; modify the board only under a reviewed
+wiring procedure or replace it with a documented module.
+
+Timer1 owns D9 and D10. Configure fast PWM directly with a prescaler of 1 and a
+top count of 799 for 20 kHz; special-case fully off and fully on rather than
+assuming the endpoint compare values behave like ordinary duty steps. Do not
+use `analogWrite()` or a library such as Servo that reconfigures Timer1. Preserve
+Timer0 for the Arduino timebase and qualify that timebase on the received board.
+
+USB serial is 250000 8N1. This has an exact ATmega328P divider at 16 MHz, unlike
+the earlier higher-rate proposal. Opening a serial port may reset an Uno-class
+board, so every connection starts a new handshake with outputs off and never
+resumes a prior run.
 
 The Kamoer red and black wires receive steady 12 V. Do not PWM the red motor
 power lead. Its internal brushless controller expects speed commands on the
@@ -179,11 +208,15 @@ white wire. The manufacturer specifies 5 V PWM at 10–30 kHz, with 0–10% stop
 and 11–100% in the regulation interval; use 20 kHz for V1.
 
 The Gikfun is a two-wire brushed motor and must not connect to an Arduino GPIO.
-Use a DRV8871-class bidirectional, current-limited H-bridge or another reviewed
-driver with adequate measured startup/running margin and a conservative fault
-current limit. A DRV8871 supports 12 V, bidirectional PWM control, and integrated
-protection, but the breakout, current-limit resistor, thermal design, power-off
-input behavior, and actual motor current still require validation.
+The preferred driver is Pololu DRV8874 carrier item `#4035`. Tie `PMODE` LOW
+before waking the carrier so it latches PH/EN mode: D10 drives `EN` at 20 kHz,
+D11 drives `PH`, and the inverted hardware-inhibit net drives `SLEEP` with a
+local pull-down. The carrier is documented for 4.5–37 V and about 2.1 A
+continuous under Pololu's open-air test conditions. Its roughly 4.4 A default
+limit is not accepted for the unknown pump. Measure startup and primed-running
+current, then select and validate the VREF resistor and closed-enclosure thermal
+envelope. If the measured envelope does not fit, select a larger documented
+driver instead of defeating current regulation.
 
 Do not put a single flyback diode directly across a motor driven by an H-bridge;
 that would defeat reversal. Use the driver's specified recirculation and
@@ -195,27 +228,28 @@ Quantities and protection values marked **TBD after measurement** are deliberate
 
 | Qty | Item | Status / selection rule |
 | ---: | --- | --- |
-| 1 | Arduino UNO R4 WiFi + data-capable USB cable | Selected for planned build. |
+| 1 | Elegoo UNO R3 + data-capable USB cable | Supplied controller; verify exact board revision and USB bridge/VID/PID. |
 | 1 | Kamoer KPHM600-12B3B17 specimen | User-selected. |
 | 1 | Gikfun AE1207 specimen | User-selected. |
-| 1 | Supplied 1 kg load cell + HX711 | Use one if confirmed four-wire full bridge. |
-| 1 | Load-cell combinator | Only if sensors are three-wire half bridges. |
-| 1 | DRV8871-class current-limited H-bridge breakout | Confirm current-limit configuration after measuring Gikfun startup and primed running current; validate faults with a dummy load rather than deliberately stalling the pump. |
-| 1 | Regulated, listed 12 V supply | Size from worst allowed simultaneous startup/current-limit demand and continuous load, with engineering margin; 3–5 A is a preliminary procurement range, not a measured requirement. |
-| 1 | Latching emergency-stop switch with DC-rated pump-power contacts and mechanically linked auxiliary contacts | At least one normally closed contact is dedicated to hardware control inhibit; use a separate contact or isolated state sense for the Arduino event input. |
-| 1 | Hardware control-inhibit and separate physical re-arm circuit | Must force pump-side `SP` and H-bridge commands off with USB still powered, remain inhibited when the E-stop is released, reject re-arm while any command input is physically high, and fail off on broken control wiring. |
-| 1 | Master fuse and two branch fuses/holders | Ratings TBD from measured load, wire gauge, driver, and supply. |
-| 1 | 12 V distribution block with locking terminals | Keep exposed mains off the bench. |
-| 1 | Bulk capacitor and local ceramic decoupling | Select per driver/pump data sheets; preliminary distribution target is 470 µF/25 V plus local 100 nF. |
+| 1 of 4 | SazkJere `SJ18` 1 kg four-wire beam + one supplied HX711 | Use one listed pair after received wire/terminal inspection. Leave `RATE` at the verified 10 SPS default. |
+| 1 | Qesdaoxu 100 mL borosilicate cylinder, ASIN `B0BLHDVC1N` | Catch vessel only. Measure empty mass, dimensions, and a conservative working fill line; the listing publishes no volumetric tolerance/class. |
+| 1 | Pololu DRV8874 carrier `#4035` | Preferred Gikfun PH/EN driver. Tie PMODE LOW; gate SLEEP; select VREF only after current/thermal measurement; validate current limiting with an electrical dummy load rather than deliberately stalling the pump. |
+| 1 | WANPTEK POWER `DPS3010U` bench supply, ASIN `B0CN989377` | Supplied 0–30 V/0–10 A CV/CC source. Before use, verify received rating/grounding labels, input-voltage revision, 12 V output, negative-to-earth relationship, and current-limit behavior. Marketplace copy does not establish an NRTL mark. |
+| 1 each | Schneider `XB5AS8444` two-NC E-stop and `XB5AA31` one-NO ARM button | NC1 removes K1/K2 coil feed; isolated NC2 only reports D7. Pump current does not pass through the operator switch. |
+| 1 each | Omron `MY4-GS-R DC12`, `PYFZ-14-E`, `PYC-A1`; Schneider `LC1D09JD` | K1 non-latching four-pole control relay without a manual latch/test lever; K2 12 VDC-coil pump-bus contactor, one power pole only. Final K2 approval remains gated by measured DC inrush/current. |
+| 1 each | TI `SN74AHCT125N`, `SN74HC14N`, `CD74HC123E`; PN2222; three 2N7000; passives | Command gate, SLEEP inversion, D9/D10-low ARM delay, external D8 edge-loss watchdog, K1 sink, and Kamoer open-drain direction. Use a soldered assembly and the point-to-point netlist, not a plug-in breadboard. |
+| 4 | Littelfuse `0FHM0001SXJ` holders and selected 297-series fuses | F0 master, FC control, FK Kamoer, FG Gikfun. Buy holders/family now; amperages remain TBD from measured loads, wire/terminal ratings, driver limit, and the 297 time-current curve. |
+| as laid out | Phoenix Contact `PT 2,5` 3209510 terminal family and 35 mm rail | Locking labelled distribution; exact count follows the full-size enclosure layout. |
+| 1 each | Hammond `PCJ12106CCLF` enclosure and `PCJR1109` panel | Confirm component fit, bend radius, heat, and gland positions before drilling. |
+| 1 | Bulk capacitor and local ceramic decoupling | Select from the driver data sheet and measured rail transients; no capacitance value is accepted before that review. |
 | 1 | 12 V TVS and reverse-polarity protection | Select against the actual supply and driver limits. |
 | 1 | Open-drain transistor interface for Kamoer F/R | Component and bias values reviewed before assembly. |
 | 1 | Rigid base, separate scale sub-base, top plate, and spill tray | Wood or acrylic; keep the live platform mechanically isolated. |
 | 1 | Cylinder locating ring and adjustable overload stop | Sized after cylinder and cell inspection. |
-| 1 | Reference-mass set with stated tolerances | Span the intended operating range; its uncertainty must be comfortably below the scale gate. Do not use ingredient packages as standards. |
-| 1 | Current-limited 12 V bench supply | Required for first Gikfun energization and characterization. An inline meter is not a substitute for current limiting. |
+| 1 fit set + 1 check | Rice Lake Class 4 `13289` 50 g, `13271` 100 g, `13273` 200 g, plus a second serialized `13271` | Order every mass with the Accredited certificate option; reserve the second 100 g only for independent checking. Add a certified 500 g mass only if the measured span requires it. |
 | 1 | Inline current probe or meter | Used in addition to the current-limited source to capture startup and running current. |
 | 1 | Oscilloscope with probes rated for the possible signal voltage | Required to verify Kamoer `SP`, qualify unknown `FG` voltage/type, and verify output timing. A logic analyzer may be used only after voltage compatibility is known. |
-| 1 | Reference thermometer/contact temperature probe with stated accuracy | Required to record liquid temperature for density conversion and bounded pump-case temperature checks. |
+| 1 | ThermoWorks Reference Thermapen `THS-222-215` | Certified immersion/contact temperature reference for water density and bounded case-temperature checks. |
 | 1 | Food-path tubing/fittings | **Not selected.** Water-only tests may use supplied tubing; ingredient use waits for documented compatibility. |
 
 ## Assembly and Bring-Up
@@ -237,12 +271,29 @@ Quantities and protection values marked **TBD after measurement** are deliberate
   pump-side control outputs low while USB remains powered.
 - Release the stop and confirm pump power/control remain inhibited until the
   separate physical re-arm is deliberately operated from a proven-off state.
+- Stop D8 edges HIGH and LOW in turn with a commissioning-only firmware build;
+  in both cases verify the `CD74HC123E` pulse expires, K1 and K2 drop, pump-side
+  `SP`/`EN` are low, and another physical ARM action is required. Record actual
+  edge interval, one-shot window, K1/K2 release, and output-off latency.
 
 ### 3. Controller and scale only
 
 - Power the UNO from USB.
 - Connect one verified HX711 path.
-- Warm up, tare, calibrate, and record drift with pumps unpowered.
+- Flash the commissioning firmware with the default unprovisioned device ID,
+  zero counts-to-gram factor, and zero vessel mass limit. Confirm its `hello`
+  frame reports the scale/limit as unavailable and that a `run` command is
+  rejected fail-off.
+- Verify each reconnect/reset creates a new reset-session ID, resets the host
+  command high-water to zero, and leaves D9/D10 low.
+- Warm the unprovisioned scale and stream raw zero/reference-mass observations;
+  the shipped zero tare-stability threshold intentionally rejects `tare`.
+  Derive and review the threshold and rational counts-to-gram factor from those
+  observations, rather than bypassing the gate.
+- Provision a unique device ID, the reviewed rational counts-to-gram factor, and
+  the reviewed tare-stability threshold and measured conservative liquid-mass
+  limit in a reviewed firmware change; rebuild, complete a real firmware tare,
+  and repeat the outputs-off tests before any physical run.
 - Repeat with pump wiring physically installed but still unpowered to expose
   mechanical interference.
 
@@ -327,8 +378,9 @@ case-temperature checks; an uncalibrated infrared estimate is only a diagnostic.
 ## Safety Boundary
 
 - The open bench is water-only.
-- Use a listed, enclosed low-voltage supply and keep mains connections off the
-  wet bench.
+- Keep the WANPTEK supply outside the wet bench, use a grounded receptacle, and
+  do not energize it until the received grounding/rating label and output
+  behavior are verified. It does not replace downstream fuses or the E-stop.
 - The Gikfun uses a brushed motor and is a potential spark source. Do not test
   ethanol near exposed electronics or a brushed motor without a reviewed
   enclosure and vapor/fire assessment.
@@ -347,8 +399,31 @@ case-temperature checks; an uncalibrated infrared estimate is only a diagnostic.
 - [Gikfun AE1207 product page](https://gikfun.com/products/gikfun-12v-dc-dosing-pump-peristaltic-dosing-head-with-connector-for-arduino-aquarium-lab-analytic-diy)
   is product-listing evidence only; it does not publish a driver or stall-current
   data sheet.
-- [TI DRV8871 documentation](https://www.ti.com/product/DRV8871) covers the
-  candidate H-bridge's operating range and protection features.
+- [Pololu DRV8874 carrier #4035](https://www.pololu.com/product/4035) documents
+  the carrier's PH/EN mode, PMODE/SLEEP behavior, adjustable current regulation,
+  and open-air thermal limits; the [TI DRV8874 data sheet](https://www.ti.com/product/DRV8874)
+  governs the IC.
+- [TI CD74HC123 documentation](https://www.ti.com/product/CD74HC123) defines the
+  retriggerable falling-edge one-shot and the nominal `0.45 × R × C` timing
+  relationship used only as a starting design value.
+- [Omron MY4-GS-R relay family](https://www.ia.omron.com/products/family/3440/lineup.html),
+  [Schneider XB5AS8444 catalog](https://iportal2.schneider-electric.com/Contents/docs/0100CT1501_SEC-19.PDF),
+  and [Schneider LC1D09JD product page](https://www.se.com/us/en/product/LC1D09JD/)
+  identify the exact control, E-stop, and pump-bus switching baseline.
+- [Rice Lake's 2026 calibration-weight catalog](https://www.ricelake.com/media/v5wpljtq/2026_calibration_weights_2-1.pdf)
+  identifies the selected Class 4 weight part numbers and accredited-certificate
+  option.
 - [SparkFun's HX711/load-cell guide](https://learn.sparkfun.com/tutorials/load-cell-amplifier-hx711-breakout-hookup-guide/all)
   explains the distinction between full-bridge cells and four combined
   three-wire sensors.
+- [SazkJere load-cell/HX711 listing](https://www.amazon.com/dp/B0B9Y584JR)
+  identifies model `SJ18`, the four-wire mapping, 2.6–5.5 V HX711 operation,
+  and nominal 10/80 SPS options; received-part inspection still governs wiring.
+- [WANPTEK DPS3010U listing](https://www.amazon.com/dp/B0CN989377) and its
+  [Amazon-hosted manual](https://m.media-amazon.com/images/I/B1ArPmFcVpS.pdf)
+  identify the adjustable CV/CC bench source and protection modes.
+- [Qesdaoxu cylinder listing](https://www.amazon.com/dp/B0BLHDVC1N) identifies
+  the nominal 100 mL borosilicate catch vessel but publishes no accuracy class.
+- [Arduino UNO R3 documentation](https://docs.arduino.cc/hardware/uno-rev3/)
+  and the [ATmega328P data sheet](https://content.arduino.cc/assets/ATmega328P_Datasheet.pdf)
+  define the controller resources and Timer1/UART behavior used here.

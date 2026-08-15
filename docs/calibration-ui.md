@@ -1,11 +1,12 @@
 # Calibration Page Interface Plan
 
-Status: Proposed visual and data contract for Milestone 2 review.
+Status: Implemented Milestone 2 interface baseline; awaiting physical data and
+production provisioning.
 
-The supplied design archive is the visual starting point, not production code.
-Its custom `x-dc` runtime and `support.js` should not ship. Port the design into
-the existing React Router/Tailwind application and bind every value to an
-explicit API or serial state.
+The supplied design archive was the visual starting point, not production code.
+Its custom `x-dc` runtime and `support.js` do not ship. The implementation ports
+the useful composition into the existing React Router application and binds
+every value to an explicit API or serial state.
 
 The exported archive screenshot is deliberately **not** embedded as an approved
 reference asset. It contains hard-coded flow values, dead zones, curve shapes,
@@ -127,26 +128,20 @@ view toggles, or carousels.
 +----------------------------------------------------------------------------+
 ```
 
-The reference acceptance viewport is exactly **1440 × 900 CSS pixels at 100%
-zoom**. At that viewport there is no horizontal or vertical page scrollbar and
-no panel has an internal scrollbar. Use a 16 px page inset and this bounded
-vertical budget (864 px of the 868 px inner height):
+The public-readout reference acceptance viewport is exactly **1440 × 900 CSS
+pixels at 100% zoom**. At that viewport the header, live instrument, sample
+tape, both pump cards, flow comparison, six recipe cards, and footer are visible
+together without a horizontal scrollbar or clipped panel. An authenticated
+operator console remains on this same route and uses ordinary document
+scrolling for its measured setup fields; it never hides data behind a tab,
+toggle, accordion, carousel, or internally scrolling panel.
 
-| Region | Maximum height |
-| --- | ---: |
-| Calibration header | 68 px |
-| Live collection + specimens row | 350 px |
-| Flow comparison + recipes row | 356 px |
-| Provenance strip | 54 px |
-| Three inter-row gaps | 36 px |
-
-The operator action strip is inside the live-collection panel's 350 px budget.
-The recent log shows at most five body rows, newest first; a source/export link
-provides the full history. The specimen panel contains exactly two cards. The
-flow plot uses one fixed plot area. Recipe cards use a fixed 3 × 2 grid, with at
-most three ingredient rows per card. Long IDs truncate visually but remain
-available to assistive text and copy actions. Do not solve overflow with hidden
-tabs, carousels, or scrollable subpanels.
+The public sample tape is deliberately bounded; retained history remains in the
+durable record. The specimen panel contains exactly two cards. The flow plot
+uses one fixed plot area. Recipe cards use a fixed 3 × 2 grid, with at most
+three ingredient rows per card. Long IDs truncate visually but remain available
+to assistive text and copy actions. Do not solve overflow with hidden tabs,
+carousels, or scrollable subpanels.
 
 At narrower widths, stack whole sections in the same order and allow document
 scrolling without hiding any component. Increased text zoom may also reflow and
@@ -241,20 +236,19 @@ calibrated” state for the other. Do not manufacture symmetry.
 
 ### Six recipe comparisons
 
-`firmware/config/recipes.yaml` is the only authored recipe catalog. Implement
-`scripts/calibration/generate-recipes.ts` and expose it as
-`pnpm calibration:recipes:generate`; it validates the catalog and writes
-`site/src/app/features/calibration/generated/recipes.ts`. The generated module
+`firmware/config/recipes.yaml` is the only authored recipe catalog.
+`worker/scripts/generate-recipes.mjs`, exposed as
+`pnpm calibration:recipes:generate`, validates the catalog and writes
+`shared/calibration/recipe-catalog.generated.ts`. The generated module
 contains recipe IDs, display names, stable order, target/ingredient volumes,
 and units only. It never contains a duration, flow, curve, status, or fallback
 result.
 
-Generation must fail on duplicate/unstable IDs, a recipe outside one to three
+Generation fails on duplicate/unstable IDs, a recipe outside one to three
 ingredients, non-positive or non-finite volumes, unsupported units, or a
 declared target that does not reconcile within the file's display-rounding
-tolerance. Add `calibration:recipes:check` to regenerate the module and fail if
-`git diff --exit-code` reports a change to it; invoke that check from
-`pnpm lint` and CI so YAML edits cannot leave the route stale. The page renders
+tolerance. `pnpm calibration:recipes:check` regenerates in memory and fails if
+the checked artifact differs, so YAML edits cannot leave the route stale. The page renders
 its six card shells from this generated artifact even when every results API is
 unavailable; API prediction records join to cards by recipe ID rather than
 duplicating recipe names in UI code.
@@ -367,8 +361,9 @@ Start remains disabled until:
 - healthy idle, running, completed, and faulted lifecycle fixtures do not alter
   connection health, and connected idle renders blue;
 - blue appears only in the healthy connection treatment;
-- live cylinder, gauge, sample log, curve, specimen cards, and recipe cards are
-  simultaneously visible with no page or panel scrollbar at exactly 1440 × 900;
+- in the public readout, live cylinder, gauge, sample log, curve, specimen
+  cards, and recipe cards are simultaneously visible without clipped panels at
+  exactly 1440 × 900;
 - `/calibration` uses the route-specific stone/cobalt shell with no global gold,
   lake, vermouth, Campari, pony-mark, or radial-background treatment;
 - single-pump, partial-liquid, rejected, completed, disconnected, and no-data

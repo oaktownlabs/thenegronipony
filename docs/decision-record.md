@@ -2,30 +2,93 @@
 
 This file tracks important project decisions. Add entries newest first.
 
+## 2026-08-15 - Use a non-latching, edge-watched fail-off control chain
+
+Status: Proposed construction baseline; electrical review and physical proof
+remain mandatory
+
+Context: USB can continue powering an Uno GPIO after pump power is removed, and
+a static software permit does not detect code wedged HIGH or LOW. Releasing an
+E-stop must not restart either pump. Generic relay/H-bridge descriptions were
+not sufficient to buy or wire the bench.
+
+Decision: Use Schneider `XB5AS8444` NC1 to remove the K1/K2 coil feed and its
+isolated NC2 to report D7; Omron `MY4-GS-R DC12` as non-latching K1; Schneider
+`LC1D09JD` as the measurement-gated K2 pump-bus disconnect; and Pololu DRV8874
+carrier `#4035` in PH/EN mode for Gikfun. Gate all commands through
+`SN74AHCT125N` with off-state pull-downs. Firmware toggles D8 every 25 ms from
+the main loop; a `CD74HC123E` retriggerable one-shot drives the K1 coil sink and
+expires if edges stop. A separate ARM button can pick up K1 only after D9/D10
+have remained low through an independent RC/Schmitt delay. K1 must have no
+manual test/latch lever.
+
+Consequences: E-stop, USB loss, reset, firmware fault, and a HIGH/LOW main-loop
+stall all have physical paths that drop control and require another ARM action.
+Fuse amperages, DRV8874 VREF, wire sizes, K2 DC-use approval, timing windows,
+thermal behavior, and release latency remain measurements, not catalog-title
+assumptions. This is a custom fail-off prototype, not a certified safety or
+functional-safety system.
+
+## 2026-08-15 - Target the supplied Elegoo UNO R3 for the calibration bench
+
+Status: Accepted for the Milestone 2 firmware baseline
+
+Context: The physical controller is an Elegoo UNO R3 rather than the previously
+assumed controller. The R3 uses a 16 MHz ATmega328P with 2 KB SRAM and no
+onboard network interface. The Kamoer requires 10–30 kHz, 5 V PWM; the first
+HX711 build needs only its as-received 10 SPS mode.
+
+Options considered:
+
+- Buy a different, newer 5 V controller.
+- Use the supplied UNO R3 with an AVR-specific backend.
+- Add embedded networking before the USB bench is qualified.
+
+Decision: Use the supplied UNO R3. Configure Timer1 directly for 20 kHz fast
+PWM on D9/OC1A for Kamoer and D10/OC1B for the Gikfun driver abstraction. Keep
+Timer0 for the qualified device timebase. Use 250000-baud USB serial, fixed
+small buffers with a 191-byte inbound limit, no Arduino `String`, monotonic host
+command numbers, and a one-device EEPROM reset-session counter rather than
+claiming random boot entropy. Acquire the HX711 on D4/D5 at 10 SPS and preserve
+raw counts; do not invent a mass conversion or acknowledge a mass guard before
+calibration is provisioned. Opening serial may reset the controller, so every
+connection begins fail-off and requires a new handshake. Emit one final
+context-bearing state for complete/fault/stop, then clear the local trial
+context so continuing idle scale samples cannot make the browser spool infinite.
+
+Consequences: The firmware becomes buildable on the hardware already owned,
+but the 2 KB SRAM budget is a hard interface constraint. D9 and D10 share one
+Timer1 frequency. Direct network transport is not a later firmware switch for
+this board; it would require different hardware or an external adapter. The
+actual USB bridge, timer output, line rate, device timebase, and optional HX711
+80 SPS path remain physical qualification gates.
+
 ## 2026-08-14 - Bridge the first calibration bench through Web Serial
 
-Status: Proposed for Milestone 2 review
+Status: Accepted
 
 Context: The calibration controller must run bounded pump tests and stream
-load-cell readings to the desktop readout and Cloudflare. Direct device Wi-Fi
-would require embedded TLS, credential provisioning, replay protection, and
-offline buffering before the physical rig has been qualified. The desktop
-operator will already be present for water tests.
+load-cell readings to the desktop readout and Cloudflare. A direct device
+network path would require additional hardware plus embedded TLS, credential
+provisioning, replay protection, and offline buffering before the physical rig
+has been qualified. The desktop operator will already be present for water
+tests.
 
 Options considered:
 
 - Arduino USB versioned serial stream to the calibration page through Web
   Serial.
-- Direct HTTPS from a Wi-Fi-capable Arduino.
+- Direct HTTPS from a different network-capable controller or external adapter.
 - A separately installed native serial daemon.
 
-Decision: Use USB at 460800 baud and a Chromium Web Serial bridge for V1. Keep
-control events as readable NDJSON and batch 80 SPS transient samples into compact
-versioned frames; use the HX711 10 SPS mode for quieter steady work. The browser
-stores events in IndexedDB until D1-projected acknowledgment and sends
-at-least-once idempotent batches. Keep the cloud contract transport-neutral so
-direct Wi-Fi can be added later. The Arduino owns every stop deadline and
-watchdog; the public live page cannot command pumps.
+Decision: Use USB at 250000 baud and a Chromium Web Serial bridge for V1. Keep
+control events and 10 SPS samples as compact, versioned NDJSON that fits the
+UNO R3's fixed-buffer budget. The browser stores events in IndexedDB until
+D1-projected acknowledgment and sends at-least-once idempotent batches. Keep the
+cloud contract transport-neutral so another controller may implement it later.
+The Arduino owns every stop deadline and watchdog; the public live page cannot
+command pumps. An optional 80 SPS mode remains gated on the received HX711
+`RATE` connection and a loss-free transport soak.
 
 Consequences: The first bench has no embedded cloud credential and continues a
 safe bounded test during an Internet interruption. The operator path requires a
@@ -34,7 +97,7 @@ Read-only viewing works in ordinary modern browsers.
 
 ## 2026-08-14 - Add a Worker, D1, and calibration Durable Objects
 
-Status: Proposed for Milestone 2 review
+Status: Superseded by the 2026-08-15 single-coordinator decision below
 
 Context: Milestone 1 intentionally needed only static assets. Realtime,
 authenticated calibration ingestion, durable samples, idempotent retry, and live
@@ -60,6 +123,35 @@ Consequences: The earlier static-site decision remains valid for rendering and
 asset delivery, while the real runtime need is served at the same hostname.
 Implementation adds migrations, authorization configuration, Worker/DO tests,
 and production release gates. An event is broadcast only after durable storage.
+
+## 2026-08-15 - Use one SQLite coordinator per physical bench
+
+Status: Accepted
+
+Context: Connected-idle truth, the one-active-trial invariant, producer-session
+leases, trial replay, and final trial transitions all concern the same physical
+bench. Splitting those rules between a presence object and per-trial objects
+would create two coordination authorities and a handoff race around trial start
+and completion.
+
+Options considered:
+
+- Keep the proposed presence object plus one Durable Object per trial.
+- Use D1 alone for presence, ingest ordering, and live fanout.
+- Use one named SQLite Durable Object per bench, with trial journals and scoped
+  WebSocket streams inside it.
+
+Decision: Use one `BenchCoordinator` named by `benchId`. It owns producer
+presence, enforces one active trial, journals idempotent batches, projects the
+contiguous durable frontier to D1, and serves both bench-scoped and
+trial-scoped hibernatable WebSockets. D1 remains the canonical public query
+store; the Durable Object remains the live coordination authority.
+
+Consequences: Trial creation and completion are serialized with bench presence,
+and `/calibration` can truthfully show a connected but idle bench without a
+second object. A single busy bench has one coordination bottleneck, which is the
+desired physical constraint for V1. Horizontal scale comes from naming another
+object for each additional bench, not for each test.
 
 ## 2026-08-14 - Publish measured-only calibration results
 

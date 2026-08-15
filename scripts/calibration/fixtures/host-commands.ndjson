@@ -1,0 +1,7 @@
+{"v":1,"t":"hello","id":"h1"}
+{"v":1,"t":"hb","id":"h2","n":1}
+{"v":1,"t":"run","id":"r1","n":2,"trial":"fixture-trial","step":0,"pump":"k","dir":"f","duty":0,"warm":0,"collect":0,"settle":0,"hard":0,"maxmg":0}
+{"v":1,"t":"clear","id":"c1","n":3}
+{"v":1,"t":"tare","id":"t1","n":4,"trial":"fixture-trial","stable":0,"wait":0}
+{"v":1,"t":"clear","id":"c2","n":5}
+{"v":1,"t":"stop","id":"s1","n":6}

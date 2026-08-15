@@ -1,7 +1,9 @@
 # Calibration Firmware, Protocol, and Cloud Plan
 
-Status: Proposed contract for Milestone 2 review. This document specifies
-software to build; it is not an implementation claim.
+Status: Milestone 2 Worker, D1 migrations, shared protocol/catalog, deterministic
+draft analysis/review/publication, and AVR vertical slice implemented for local review. Physical commissioning values,
+Cloudflare resource provisioning, Access application values, and live hardware
+acceptance remain explicit pre-production gates.
 
 ## Design Rules
 
@@ -53,33 +55,24 @@ the browser, but it must never wait for Cloudflare to stop a pump.
 
 ## Serial Protocol
 
-Transport is UTF-8 newline-delimited JSON at **460800 8N1**. Control and state
-events remain readable JSON, while high-rate measurements use compact sample
-blocks. Maximum line length is 4096 bytes in firmware and the browser; oversize
-or invalid lines create a fault/event rather than unbounded buffering.
+The implemented AVR V1 transport is UTF-8 NDJSON at **250000 8N1**. Firmware
+uses a fixed 192-byte command buffer and rejects inbound lines longer than 191
+bytes excluding CR/LF. It emits one compact `s` frame per HX711 reading at
+most 10 SPS; V1 makes no 80 SPS or sample-block claim. Device heartbeat frames
+arrive every 500 ms, and the armed/running host watchdog fails off at 1500 ms.
 
-The HX711 has two explicit acquisition modes:
-
-- `steady_10_sps` for low-noise tare, drift, and steady-flow work; and
-- `transient_80_sps` for the 1 s, 2 s, and 5 s start/stop tests.
-
-At 80 SPS, the device emits a block at least every 50 ms rather than a verbose
-object for every reading. A block carries shared trial/state fields plus compact
-integer tuples such as `[deltaMs, rawAdc, massMg, dutyBasisPoints, flags]`.
-The browser expands those tuples into the canonical events below before writing
-the local spool. The device still assigns a distinct sequence number to every
-sample. UI rendering may be throttled, but no stored sample is dropped.
-
-The firmware must prove loss-free, non-blocking transmission at the selected
-rate with worst-case frame sizes. If the actual UNO/USB path cannot sustain
-that test, reduce payload size or use a binary sample block in protocol V2; do
-not silently fall back to an under-sampled transient trial.
+The compact wire shapes and the sole canonical expansion function live in
+`shared/calibration/serial-protocol.ts`. The browser must call
+`canonicalizeSerialFrame()` before local display, IndexedDB, hashing, or upload.
+That makes the Worker, UI, and test fixtures share one translation rather than
+independently interpreting AVR abbreviations.
 
 ### Device identity and ordering
 
-Every boot creates a random `bootId`. Every canonical event consumes the next
-`seq`; a compact sample-block envelope therefore spans a declared contiguous
-sequence range rather than consuming one sequence for the whole block.
+Every device frame consumes the next `seq`, beginning at one after boot. The
+wire `boot` value is an eight-hex EEPROM monotonic reset-session counter, not a
+random UUID. Its uniqueness scope is one provisioned `deviceId` while EEPROM is
+preserved. Erasing or replacing EEPROM requires a new recorded provenance epoch.
 
 ```text
 event identity = (deviceId, bootId, seq)
@@ -87,6 +80,15 @@ event identity = (deviceId, bootId, seq)
 
 `deviceMs` is monotonic time since boot. It is never interpreted as wall-clock
 time. The browser and server add their own receipt timestamps.
+
+Wire frames share `{v:1,t,dev,boot,seq,ms}`. The implemented state alphabet is
+`boot|idle|tare|armed|running|settling|complete|fault`. `hello` additionally
+reports `fw,baud,hz,lastn,scale,cal,caln,cald,idok,limitmg`; unprovisioned
+calibration fields are `null` and `limitmg:0` means unknown. `state` reports
+`trial,step,pump,duty,zero`. `s` reports
+`trial,step,state,pump,raw,mg,duty,tc,flags`. `hb`, `ack`, and `fault` use the
+byte-exact shapes and bounds documented in
+`firmware/calibration-bench/README.md`.
 
 ### Device-to-host frame types
 
@@ -103,8 +105,15 @@ type DeviceFrame =
       hardwareRevision: string;
       protocolVersion: 'tnp.serial.v1';
       capabilities: string[];
-      serialBaud: 460800;
-      acquisitionModes: Array<'steady_10_sps' | 'transient_80_sps'>;
+      serialBaud: 250000;
+      acquisitionModes: ['steady_10_sps'];
+      lastAcceptedCommandNumber: number;
+      loadCellCalibrated: boolean;
+      loadCellCalibrationId: string | null;
+      countsPerGramNumerator: number | null;
+      countsPerGramDenominator: number | null;
+      deviceIdentityProvisioned: boolean;
+      configuredMassLimitMg: number | null;
     }
   | {
       v: 1;
@@ -117,7 +126,7 @@ type DeviceFrame =
       stepIndex: number | null;
       state: BenchState;
       pumpSpecimenId: string | null;
-      acquisitionMode: 'steady_10_sps' | 'transient_80_sps';
+      acquisitionMode: 'steady_10_sps';
       expectedSampleIntervalMs: number;
       dutyBasisPoints: number;
       dutyTimerCount: number;
@@ -141,73 +150,68 @@ type DeviceFrame =
       expectedEventIntervalMs: number;
       code?: FaultCode;
       detail?: string;
+      lastAcceptedCommandNumber?: number;
     };
-
-interface SampleBlockWireV1 {
-  v: 1;
-  type: 'sample_block';
-  deviceId: string;
-  bootId: string;
-  firstSeq: number;
-  baseDeviceMs: number;
-  trialId: string;
-  stepIndex: number;
-  state: BenchState;
-  pumpSpecimenId: string;
-  acquisitionMode: 'steady_10_sps' | 'transient_80_sps';
-  expectedSampleIntervalMs: number;
-  // Each row consumes the next sequence number.
-  rows: Array<[
-    deltaMs: number,
-    rawAdc: number,
-    massMg: number | null,
-    dutyBasisPoints: number,
-    dutyTimerCount: number,
-    flags: number,
-    supplyMv: number | null
-  ]>;
-}
 ```
 
 Fixed-point milligrams, millivolts, and duty basis points avoid ambiguous float
-serialization. `null` means not measured; it is not zero. A wire-level sample
-block is only a compression envelope: after expansion, each canonical event is
-independently hashed and identified by `(deviceId, bootId, seq)`.
-The bit assignments for `flags` live in shared generated protocol constants;
-unknown required bits make a frame unsupported instead of being guessed.
+serialization. `null` means not measured; it is not zero. Idle raw `s` frames
+canonically carry `trialId:null`, `stepIndex:null`, and `pumpSpecimenId:null` so
+commissioning can inspect the load cell before a trial. They are not sent to a
+trial batch. Trial-bound TARE and ARMED samples retain the `trialId` while their
+step and pump remain `null`; they are preserved in the trial batch and D1 so
+device sequences remain contiguous. RUNNING samples bind the stored step and
+specimen. SETTLING retains the firmware's finished-step context with a zero
+Timer1 count. A sensor-triggered sample is emitted after the core enters FAULT
+but before the terminal state and fault-code frames: a RUNNING fault retains
+the stored step, specimen, and commanded duty while proving motor off and a
+zero timer count; a TARE fault retains only the trial and reports zero duty and
+timer count. Other unbound trial samples are valid only in TARE or ARMED with
+the pump off.
+`flags` bit 0 is motor on, bit 1 is mass available, and bit 2 is E-stop
+unhealthy; unknown bits are rejected.
+
+STOP preserves the active trial through its acknowledgment and context-bearing
+IDLE state, then clears the firmware buffer. COMPLETE and FAULT likewise emit a
+context-bearing terminal state before clearing; FAULT immediately follows it
+with the separate fault-code frame. The browser releases its compact trial
+context synchronously after COMPLETE/IDLE or after that FAULT code, before the
+next heartbeat can enter the closing spool. Subsequent anonymous samples and
+heartbeats belong to bench presence, not the trial frontier.
 
 ### Host-to-device commands
 
 ```ts
 type HostCommand =
-  | { v: 1; type: 'hello'; commandId: string }
-  | { v: 1; type: 'heartbeat'; commandId: string }
+  | { v: 1; t: 'hello'; id: string }
+  | { v: 1; t: 'hb'; id: string; n: number }
   | {
       v: 1;
-      type: 'tare';
-      commandId: string;
-      trialId: string;
-      minimumStableMs: number;
-      maximumWaitMs: number;
+      t: 'tare';
+      id: string;
+      n: number;
+      trial: string;
+      stable: number;
+      wait: number;
     }
   | {
       v: 1;
-      type: 'start_step';
-      commandId: string;
-      trialId: string;
-      stepIndex: number;
-      pumpSpecimenId: string;
-      direction: 'forward' | 'reverse';
-      dutyBasisPoints: number;
-      warmupMs: number;
-      collectionMs: number;
-      settleMs: number;
-      acquisitionMode: 'steady_10_sps' | 'transient_80_sps';
-      hardStopMs: number;
-      maximumMassMg: number;
+      t: 'run';
+      id: string;
+      n: number;
+      trial: string;
+      step: number;
+      pump: 'k' | 'g';
+      dir: 'f' | 'r';
+      duty: number;
+      warm: number;
+      collect: number;
+      settle: number;
+      hard: number;
+      maxmg: number;
     }
-  | { v: 1; type: 'stop'; commandId: string; reason: string }
-  | { v: 1; type: 'clear_fault'; commandId: string };
+  | { v: 1; t: 'stop'; id: string; n: number }
+  | { v: 1; t: 'clear'; id: string; n: number };
 
 interface TrialPlanV1 {
   schema: 'tnp.calibration.plan.v1';
@@ -220,7 +224,7 @@ interface TrialPlanV1 {
     warmupMs: number;
     collectionMs: number;
     settleMs: number;
-    acquisitionMode: 'steady_10_sps' | 'transient_80_sps';
+    acquisitionMode: 'steady_10_sps';
     maximumMassMg: number;
     hardStopMs: number;
   }>;
@@ -228,9 +232,12 @@ interface TrialPlanV1 {
 }
 ```
 
-The firmware validates state, numeric range, pump identity, deadline ordering,
-and maximum allowed duration before acknowledging a step. A duplicated
-`commandId` returns the stored acknowledgment and cannot start a second run.
+Command IDs use the firmware identifier alphabet and are at most 16 characters;
+trial IDs use the same alphabet and are at most 24. `hello` is unsequenced.
+Every other command must present `n == lastn + 1`. Firmware caches the last
+semantic command fingerprint and acknowledgment, so an exact retry returns
+`dup:1` without repeating an action. Older, skipped, exhausted, or changed
+same-`n` commands fail off with `command_sequence`.
 
 ## Browser Bridge
 
@@ -244,7 +251,8 @@ authorizes the user; public viewers remain read-only.
   from a user gesture.
 - Parse incrementally and cap the line, queue, and in-memory history sizes.
 - Validate every frame before it can affect UI or cloud data.
-- Expand compact sample blocks without changing device sequence or time.
+- Expand compact AVR frames only through shared `canonicalizeSerialFrame()`;
+  throttle rendering without dropping canonical samples.
 - Correlate commands and acknowledgments with bounded timeouts.
 - Send heartbeats only while the page owns the bench.
 - On page close or serial error, attempt `stop`; safety still depends on the
@@ -291,21 +299,32 @@ Keep one Worker and hostname:
 The Worker always handles `/api/*`: an unknown API route returns a JSON `404`,
 and a non-upgraded live route returns `426`. Neither may fall through to the SPA.
 For `/calibration`, it delegates to `ASSETS.fetch()` and adds the reviewed CSP
-and `Permissions-Policy: serial=(self)` headers to the response. Other static
-routes keep asset-first behavior.
+and `Permissions-Policy: serial=(self)` headers to the response. Successful HTML
+is streamed through `HTMLRewriter`: every React Router bootstrap script receives
+one cryptographically random per-response nonce and `script-src` permits only
+same-origin scripts plus that nonce. The rewritten document is `no-store` and
+has stale entity-length/ETag headers removed. Document navigations also drop
+request validators before `ASSETS.fetch()` so a cached `304` can never separate
+an old HTML body from its response-local CSP nonce. Non-HTML, error, and static
+asset bodies are not rewritten, and other static routes keep asset-first
+behavior.
 
-One SQLite-backed `TrialCoordinator` Durable Object is addressed with
-`getByName(trialId)`. Its SQLite storage owns trial state, producer ownership,
-the ingest journal, stream-sequence allocation, and the bounded replay window.
-A lightweight `BenchCoordinator` addressed with `getByName(benchId)` owns fresh
-producer presence, connected-idle state, and the pointer to the active/recent
-trial. D1 is the canonical normalized query store.
+One SQLite-backed `BenchCoordinator` Durable Object is addressed with
+`getByName(benchId)`. Its SQLite storage owns producer presence, the one-active-
+trial invariant, trial producer ownership, ingest journals, stream-sequence
+allocation, and bounded replay windows for that physical bench. This single
+serialization authority is what makes connected-idle presence truthful without
+introducing a second coordinator that can disagree about the active trial. A
+trial live route resolves `trialId -> benchId` in D1 and delegates to the same
+object. D1 is the canonical normalized query store and accepted-read-model
+authority.
 
 ### Persist-before-publish path
 
 1. Worker validates request method, content type, size, origin, Access JWT, and
    schema.
-2. Worker routes the batch to the trial's Durable Object.
+2. Worker resolves the trial's bench and routes the batch to that bench's
+   Durable Object.
 3. Durable Object validates producer ownership, batch identity, body hash,
    state transition, and sequence information.
 4. In one Durable Object storage transaction, reserve ordered `streamSeq`
@@ -338,6 +357,7 @@ cannot later explain.
 
 ```text
 GET  /api/v1/calibration/bootstrap?bench=bench-01
+GET  /api/v1/calibration/current?bench=bench-01
 GET  /api/v1/benches/{benchId}/live
 GET  /api/v1/trials/{trialId}
 GET  /api/v1/trials/{trialId}/samples?cursor=...&through=...
@@ -349,15 +369,20 @@ GET  /api/v1/health
 
 GET  /api/v1/operator/authorize?returnTo=/calibration
 GET  /api/v1/operator/session
+GET  /api/v1/operator/setup?device={deviceId}
+POST /api/v1/operator/pump-specimens
+POST /api/v1/operator/load-cell-calibrations
 POST /api/v1/operator/benches/{benchId}/sessions
 POST /api/v1/operator/benches/{benchId}/sessions/{sessionId}/heartbeats
-DELETE /api/v1/operator/benches/{benchId}/sessions/{sessionId}
 POST /api/v1/operator/trials
 POST /api/v1/operator/trials/{trialId}/batches
-POST /api/v1/operator/trials/{trialId}/lease/renew
-POST /api/v1/operator/trials/{trialId}/lease/takeover
 POST /api/v1/operator/trials/{trialId}/complete
 POST /api/v1/operator/trials/{trialId}/abort
+POST /api/v1/operator/trials/{trialId}/force-abort
+POST /api/v1/operator/calibration-curves/drafts
+GET  /api/v1/operator/calibration-curves/{curveId}
+POST /api/v1/operator/calibration-curves/{curveId}/review
+POST /api/v1/operator/calibration-curves/{curveId}/publish
 ```
 
 The live route requires a WebSocket upgrade. Page and read routes are public;
@@ -365,6 +390,9 @@ every route under `/api/v1/operator/*` is protected by Cloudflare Access and
 Worker-side token validation. Public responses use explicit view models that
 exclude operator identity, private notes, Access claims, leases, and ingest
 diagnostics.
+
+Draft fitting, uncertainty, chronological holdout, review, and publication
+gates are specified in [calibration-analysis.md](calibration-analysis.md).
 
 Direct `/calibration` uses `bench-01` from checked public configuration unless
 a validated `?bench=` is supplied. Bootstrap returns fresh bench presence, the
@@ -380,7 +408,28 @@ the `BenchCoordinator` and acknowledged with device/boot/sequence plus
 `durableAt`; the bench WebSocket then fans out that durable presence. When a
 trial is active, heartbeats travel through the trial event journal and are not
 acknowledged as current until D1 projection. This gives connected-idle a real
-end-to-end durability signal without manufacturing a trial.
+end-to-end durability signal without manufacturing a trial. The heartbeat URL
+accepts `{schema:'tnp.calibration.bench-heartbeat.v1', frame}` plus
+`X-Calibration-Bench-Lease`; `frame` must be a canonical idle
+`heartbeat|state|fault` with `trialId:null`. Its acknowledgment repeats
+bench/session/device/boot/seq and returns `durableAt` plus the renewed expiry.
+
+### Physical-record registration
+
+Pump specimens are operator-entered physical identities, not product-listing
+aliases. `POST /operator/pump-specimens` records an owner specimen ID, the
+catalog pump model, a label, and optional acquisition evidence.
+
+`POST /operator/load-cell-calibrations` accepts one HX711 channel, a nonzero
+signed `countsPerGramNumerator`, positive denominator, 4–16 raw known-mass fit
+observations spanning at least 50 g, and a distinct interior holdout
+mass/raw/residual. Fit masses and raw readings must be strictly monotonic. The
+Worker recomputes every fit residual and the holdout residual, rejecting a
+coefficient mismatch or residual exceeding 1% or 1 g. It never creates a
+calibration ID from defaults. Trial creation rejects an unknown calibration, a
+calibration from another device, or a specimen/model mismatch. `GET
+/operator/setup` returns each calibration ID with its accepted device and
+signed numerator/positive denominator pair for the browser picker.
 
 ### Trial creation contract
 
@@ -397,6 +446,8 @@ interface CreateTrialV1 {
   firmwareVersion: string;
   protocolVersion: 'tnp.serial.v1';
   loadCellCalibrationId: string;
+  loadCellCountsPerGramNumerator: number;
+  loadCellCountsPerGramDenominator: number;
   fluid: {
     name: string;
     densityMgPerL: number;
@@ -420,19 +471,36 @@ Product-listing flow is pump metadata and never seeds a measured field. The
 server resolves the specimen record and rejects a supplied `pumpModelId` that
 does not match it.
 
+The trial repeats the load-cell rational coefficients reported by the selected
+setup record. The coordinator resolves the accepted calibration and requires
+its device, numerator, and denominator to match exactly. A missing calibration
+returns `load_cell_calibration_not_registered`; an ID with mismatched device or
+coefficients returns `409 load_cell_calibration_mismatch`. This prevents a
+stale browser or changed firmware coefficient from silently attaching samples
+to the wrong accepted scale provenance.
+
 Trial creation must present the fresh bench-session lease and matching
 device/boot identity. Successful creation returns a high-entropy, trial-scoped
-producer lease exactly once. The `TrialCoordinator` stores only its
+producer lease exactly once. The `BenchCoordinator` stores only its
 cryptographic hash and binds it to the Access subject, `benchId`, `deviceId`,
 `bootId`, and a random `producerSessionId`. Every trial mutation requires both a
 valid Access identity and that lease; neither lease is compiled into the SPA.
 
 The browser keeps the lease in the same bounded local operator store as the
-spool. An active producer renews a short expiry with heartbeats. Reload resumes
-with the retained lease. If it is lost, an Access-authorized takeover atomically
-revokes the old lease only after the bench reports pump-off and either the old
-producer is stale or the operator explicitly aborts the trial. Releasing an
-emergency stop never constitutes lease renewal or automatic run resumption.
+spool. An active producer renews a short expiry through accepted active-trial
+batches, and the canonical expiry is persisted in both the coordinator and D1.
+Reload resumes with the retained lease. While it remains live, only the ordinary
+lease-bearing complete/abort routes may close the trial.
+
+Once the lease has expired, an Access-authorized operator may call
+`POST /api/v1/operator/trials/{trialId}/force-abort` without the lost producer
+lease. It accepts
+`{schema:'tnp.calibration.trial-force-abort.v1',reason:<nonblank>}` and rejects a
+still-live lease. Success returns `tnp.calibration.trial-force-aborted.v1`,
+releases the bench, and appends an immutable transition audit containing the
+acting Access identity, reason, prior expiry, and `forced_missing` evidence
+status. This is an explicit recovery operation, not automatic takeover or run
+resumption.
 
 ### Batch and acknowledgment
 
@@ -487,6 +555,8 @@ Batch identity is `(trialId, producerSessionId, batchId)` and also stores
 - Sequence gaps may be stored but remain visible in `missingRanges`; a trial
   cannot be accepted with unresolved fit-window gaps.
 - Only one authenticated producer owns an active trial.
+- Canonical step, specimen, duty, Timer1 count, motor state, and state-frame
+  detail are checked against the stored trial plan before journal insertion.
 
 `canonicalEvent` means the validated event serialized with the JSON
 Canonicalization Scheme (RFC 8785); all protocol numeric fields are bounded
@@ -497,6 +567,13 @@ change event identity.
 The bridge removes spooled events only through
 `contiguousProjectedThrough` for the matching device and boot. `accepted` or an
 HTTP success alone is insufficient.
+
+Ordinary completion and abort both require an empty projection outbox, an exact
+final sequence, a gap-free projected frontier, and a durable terminal firmware
+state proving the pump is off. Completion specifically requires COMPLETE;
+ordinary abort accepts the terminal IDLE/COMPLETE/FAULT protocol states. Forced
+abort is intentionally separate because it records that terminal evidence is
+missing rather than pretending the physical trial completed normally.
 
 If projection does not finish inside the ingest request budget, return `202`
 with `ProjectionQueuedV1`. A retry with the same batch identity/hash returns the
@@ -523,35 +600,39 @@ bench_devices
   last_firmware_version
 
 load_cell_calibrations
-  id PK, bench_id, performed_at, raw_reference_json,
-  fit_parameters_json, fit_statistics_json
+  id PK, bench_device_id, firmware_version, hx711_mode, channel_count,
+  counts_per_gram_numerator, counts_per_gram_denominator,
+  reference_observations_json, independent_check_json, method_version,
+  recorded_at, created_at, accepted_at, notes
 
 trials
-  id PK, pump_specimen_id, pump_model_id, bench_id,
-  operator_subject, operator_email, transport, firmware_version,
-  protocol_version, state, fluid_name, density_mg_per_l,
-  density_source, temperature_milli_c, load_cell_calibration_id,
-  setup_json, plan_json, contiguous_published_stream_seq,
-  started_at, ended_at, created_at, updated_at
+  id PK, bench_id, bench_session_id, producer_session_id,
+  producer_lease_expires_at, access_subject,
+  device_id, boot_id, pump_specimen_id, pump_model_id,
+  load_cell_calibration_id, state, transport, firmware_version,
+  protocol_version, fluid_json, setup_json, plan_json,
+  contiguous_published_stream_seq, contiguous_projected_device_seq,
+  started_at, completed_at, created_at, updated_at, private_notes
+
+trial_transitions
+  id PK, trial_id, transition_kind, evidence_status, from_state, to_state,
+  final_device_seq, reason, actor_subject, actor_email, actor_auth_mode,
+  occurred_at
 
 trial_steps
   trial_id + step_index PK, repeat_index, direction,
-  duty_basis_points, duty_timer_count, acquisition_mode, hx711_rate_sps,
-  warmup_ms, collection_ms, settle_ms, measured_output_duration_us,
-  timing_uncertainty_us, start_device_seq, end_device_seq,
-  start_mass_mg, end_mass_mg, slope_mg_s, flow_ul_s,
-  flow_uncertainty_ul_s, fit_r2_ppm, residual_stddev_mg,
-  sample_count, transient_result_json, quality_flags_json, review_status
+  duty_basis_points, plan_json, state
 
 ingest_batches
   trial_id + producer_session_id + batch_id PK,
   body_sha256, device_id, boot_id, first_seq, last_seq,
-  event_count, accepted_count, ack_json, received_at
+  event_count, accepted_count, duplicate_count, ack_json,
+  received_at, projected_at
 
 device_events
   device_id + boot_id + device_seq PK,
   event_sha256, trial_id, stream_seq, event_type, device_ms,
-  received_at, payload_json
+  received_at, event_json
 
 samples
   device_id + boot_id + device_seq PK,
@@ -564,14 +645,27 @@ trial_events
   trial_id + stream_seq PK, device_id, boot_id, device_seq
 
 calibration_curves
-  id PK, pump_specimen_id, pump_model_id, fluid_name, tube_id, status,
-  algorithm_version, source_trial_ids_json, min_duty_basis_points,
-  max_duty_basis_points, fit_parameters_json, fit_statistics_json,
-  created_at, published_at, supersedes_id
+  id PK, pump_specimen_id, pump_model_id, liquid, tube_id,
+  min_duty_basis_points, max_duty_basis_points, review_status,
+  estimate_class, source_trial_ids_json, analysis_method_version,
+  evidence_hash, setup_fingerprint, setup_profile_json, quality_json,
+  publication_eligible, reviewed_at, reviewed_by, created_at, published_at
 
 calibration_points
   curve_id + duty_basis_points PK, flow_ul_s,
-  uncertainty_ul_s, sample_count
+  uncertainty_ul_s, sample_count, evidence_json
+
+calibration_curve_reviews
+  id PK, curve_id UNIQUE, decision, reason, actor identity,
+  analysis_evidence_hash, occurred_at
+
+public_curve_selections
+  pump_model_id PK, pump_specimen_id, curve_id UNIQUE, setup_fingerprint,
+  selected_by, selection_reason, selected_at
+
+calibration_curve_publications
+  id PK, curve_id, pump_model_id, pump_specimen_id, analysis_evidence_hash,
+  selection_reason, actor identity, occurred_at
 ```
 
 Required indexes:
@@ -581,7 +675,9 @@ samples(trial_id, stream_seq)
 samples(trial_id, step_index, device_ms)
 device_events(trial_id, stream_seq)
 trials(pump_model_id, state, started_at)
-calibration_curves(pump_model_id, status, published_at)
+calibration_curves(pump_model_id, review_status, published_at)
+calibration_curves(evidence_hash, analysis_method_version) UNIQUE when present
+public_curve_selections(pump_specimen_id)
 ```
 
 `device_events` is the immutable authority. `samples` and `trial_events` are
@@ -597,6 +693,15 @@ automatic deletion policy before real volume and export verification exist.
 
 Public routes return versioned shapes, never raw tables. `null` plus a specific
 `missingReason` represents absent evidence.
+
+The service never chooses a latest curve by model. Publication creates an
+explicit `(pumpModelId, pumpSpecimenId, curveId)` selection. Two selected curves
+may drive a comparison only when their liquid, measured geometry/head, PWM,
+supply, and temperature profiles are compatible. Pump-specific tube IDs remain
+explicit and may differ across the two slots; a single specimen curve may not
+combine trials from different tube IDs. Incompatible public selections return
+`setup_mismatch`, and recipe predictions preserve the curve's stored
+`estimateClass`.
 
 ```ts
 type EstimateClass =
@@ -634,6 +739,8 @@ interface PumpReadModelV1 {
       sampleCount: number;
     }>;
     reviewStatus: 'accepted';
+    estimateClass: EstimateClass;
+    setupFingerprint: string;
     sourceTrialIds: string[];
     publishedAt: string;
   };
@@ -848,24 +955,31 @@ Required coverage:
 
 - firmware state machine, watchdog, deadline, duplicate command, invalid frame,
   scale timeout, saturation, and emergency stop;
-- 10/80 SPS serial framing across partial/multiple lines and oversize input,
-  plus a worst-case 460800-baud soak with zero sequence loss;
+- 10 SPS compact framing across partial/multiple lines and oversize input,
+  plus a worst-case 250000-baud soak with zero sequence loss;
 - IndexedDB reload/retry and deletion only through a projected frontier;
 - API schema and fixed units;
+- exact compact TARE/ARMED/RUNNING/SETTLING/COMPLETE expansion through Worker
+  validation and nullable-step D1 sample projection;
+- four-or-more monotonic scale fit points, every-point residual checks, and a
+  distinct holdout;
 - Access JWT signature, issuer, audience, expiry, public-read/protected-write,
-  authorize redirect, bench/trial lease expiry, reload resume, and safe takeover;
+  authorize redirect, bench/trial lease expiry, reload resume, and explicit
+  audited expired-lease force-abort followed by fresh bench ownership
+  (automatic takeover is intentionally unsupported);
 - connected-idle heartbeat durability, fanout, stale transition, and active-trial
   handoff;
 - same batch retry, conflicting batch-body reuse, lost acknowledgments, and the
   same events rebuilt into different batches;
 - global event duplicate suppression, conflicting event hashes, cross-trial
   rebinding rejection, sequence gaps, and late recovery;
-- illegal state transitions and D1 rollback;
+- plan/specimen/duty/timer/motor mismatches, illegal state transitions, and D1
+  rollback;
 - concurrent `N`/`N+1` ingest and contiguous-frontier enforcement;
 - crash recovery after journal insert, after D1 commit, after projected marking,
   and before broadcast;
-- alarm recovery after the producer disappears and refusal to complete with a
-  non-empty outbox;
+- alarm recovery after the producer disappears, refusal to complete or
+  ordinarily abort with a non-empty outbox, and forced-recovery audit evidence;
 - Durable Object snapshot, fanout, hibernation attachments, replay, and reset
   while active ingestion continues;
 - migration tests with local bindings;
