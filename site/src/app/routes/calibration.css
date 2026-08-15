@@ -1,0 +1,1157 @@
+:root {
+  --cal-stone-50: #fafaf9;
+  --cal-stone-100: #f5f5f4;
+  --cal-stone-200: #e7e5e4;
+  --cal-stone-300: #d6d3d1;
+  --cal-stone-400: #a8a29e;
+  --cal-stone-500: #78716c;
+  --cal-stone-600: #57534e;
+  --cal-stone-700: #44403c;
+  --cal-stone-800: #292524;
+  --cal-stone-900: #1c1917;
+  --cal-stone-950: #0c0a09;
+  --cal-cobalt: #0047ab;
+}
+
+body.calibration-body {
+  background: var(--cal-stone-950);
+  color: var(--cal-stone-100);
+}
+
+.calibration-shell {
+  min-height: 100vh;
+  background:
+    linear-gradient(rgb(168 162 158 / 4%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(168 162 158 / 3%) 1px, transparent 1px), var(--cal-stone-950);
+  background-size: 28px 28px;
+  color: var(--cal-stone-100);
+  font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+  padding: 22px clamp(16px, 2.3vw, 42px) 28px;
+}
+
+.calibration-shell *,
+.calibration-shell *::before,
+.calibration-shell *::after {
+  border-color: var(--cal-stone-700);
+}
+
+.calibration-shell h1,
+.calibration-shell h2,
+.calibration-shell h3,
+.calibration-shell p {
+  margin: 0;
+}
+
+.calibration-shell h1,
+.calibration-shell h2,
+.calibration-shell h3 {
+  font-family: "IBM Plex Serif", Georgia, serif;
+  font-weight: 500;
+}
+
+.simulation-banner {
+  border: 1px solid var(--cal-stone-200);
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--cal-stone-900),
+    var(--cal-stone-900) 8px,
+    var(--cal-stone-800) 8px,
+    var(--cal-stone-800) 16px
+  );
+  color: var(--cal-stone-50);
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  margin: -22px calc(clamp(16px, 2.3vw, 42px) * -1) 18px;
+  padding: 9px;
+  text-align: center;
+}
+
+.calibration-header {
+  align-items: end;
+  border-bottom: 3px double var(--cal-stone-500);
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 0 16px;
+}
+
+.calibration-header__brand > p,
+.micro-label {
+  color: var(--cal-stone-400);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+.calibration-header__brand h1 {
+  font-size: clamp(28px, 3.2vw, 52px);
+  line-height: 0.95;
+  margin-top: 5px;
+}
+.calibration-header__brand > span {
+  color: var(--cal-stone-500);
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  margin-top: 9px;
+}
+
+.connection-plate {
+  align-items: center;
+  border: 1px solid var(--cal-stone-700);
+  display: flex;
+  gap: 12px;
+  min-width: 302px;
+  padding: 12px 14px;
+}
+
+.connection-plate__lamp {
+  background: var(--cal-stone-600);
+  border: 5px solid var(--cal-stone-800);
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px var(--cal-stone-500);
+  height: 20px;
+  width: 20px;
+}
+
+.connection-plate--connected {
+  border-color: var(--cal-cobalt);
+}
+.connection-plate--connected .connection-plate__lamp {
+  background: var(--cal-cobalt);
+  box-shadow:
+    0 0 0 1px var(--cal-cobalt),
+    0 0 18px rgb(0 71 171 / 70%);
+}
+.connection-plate strong {
+  display: block;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+.connection-plate--connected strong {
+  color: var(--cal-cobalt);
+}
+.connection-plate small {
+  color: var(--cal-stone-500);
+  display: block;
+  font-size: 9px;
+  margin-top: 4px;
+}
+
+.status-rail {
+  border-bottom: 1px solid var(--cal-stone-800);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin-bottom: 14px;
+}
+
+.status-rail > div {
+  border-right: 1px solid var(--cal-stone-800);
+  display: grid;
+  gap: 2px;
+  padding: 9px 12px;
+}
+.status-rail > div:first-child {
+  padding-left: 0;
+}
+.status-rail > div:last-child {
+  border-right: 0;
+}
+.status-rail span {
+  color: var(--cal-stone-500);
+  font-size: 8px;
+  letter-spacing: 0.16em;
+}
+.status-rail strong {
+  font-size: 13px;
+  font-weight: 500;
+}
+.status-rail small {
+  color: var(--cal-stone-600);
+  font-size: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.instrument-card {
+  background: rgb(28 25 23 / 88%);
+  border: 1px solid var(--cal-stone-700);
+}
+.instrument-card__heading {
+  align-items: start;
+  border-bottom: 1px solid var(--cal-stone-700);
+  display: flex;
+  justify-content: space-between;
+  padding: 13px 15px 11px;
+}
+.instrument-card__heading h2 {
+  font-size: 21px;
+  line-height: 1.1;
+  margin-top: 4px;
+}
+.instrument-card__heading h3 {
+  font-size: 24px;
+}
+.etched-badge {
+  border: 1px solid var(--cal-stone-600);
+  color: var(--cal-stone-400);
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  padding: 5px 7px;
+}
+
+.operator-console {
+  align-items: end;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(245px, 1.25fr) minmax(210px, 1fr) minmax(150px, 0.7fr) 95px 95px;
+  margin-bottom: 14px;
+  padding: 13px;
+}
+
+.operator-console__intro h2 {
+  font-size: 19px;
+  margin: 3px 0 4px;
+}
+.operator-console__intro > p:last-child {
+  color: var(--cal-stone-400);
+  font-size: 9px;
+  line-height: 1.45;
+}
+.operator-console__connection {
+  align-self: stretch;
+  border-left: 1px solid var(--cal-stone-700);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: 12px;
+}
+.operator-console__connection span,
+.operator-field label {
+  color: var(--cal-stone-500);
+  display: block;
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  margin-bottom: 6px;
+}
+.operator-console__connection strong {
+  font-size: 10px;
+  font-weight: 500;
+}
+.operator-console__connection small {
+  color: var(--cal-stone-400);
+  font-size: 8px;
+  margin-top: 4px;
+}
+.operator-field select,
+.operator-field input {
+  appearance: none;
+  background: var(--cal-stone-950);
+  border: 1px solid var(--cal-stone-600);
+  border-radius: 0;
+  color: var(--cal-stone-100);
+  font: inherit;
+  font-size: 10px;
+  height: 34px;
+  padding: 0 9px;
+  width: 100%;
+}
+.operator-field--number input {
+  font-size: 15px;
+}
+.operator-field > small {
+  color: var(--cal-stone-600);
+  display: block;
+  font-size: 7px;
+  margin-top: 4px;
+}
+.operator-actions {
+  display: flex;
+  gap: 7px;
+  grid-column: 1 / -1;
+}
+.control-button {
+  background: var(--cal-stone-900);
+  border: 1px solid var(--cal-stone-600);
+  color: var(--cal-stone-200);
+  cursor: pointer;
+  font:
+    700 9px / 1 "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.08em;
+  min-height: 34px;
+  padding: 8px 12px;
+}
+.control-button:hover:not(:disabled) {
+  background: var(--cal-stone-800);
+  border-color: var(--cal-stone-300);
+}
+.control-button:disabled {
+  color: var(--cal-stone-600);
+  cursor: not-allowed;
+}
+.control-button--primary:not(:disabled) {
+  background: var(--cal-stone-700);
+  border-color: var(--cal-stone-200);
+  color: var(--cal-stone-50);
+}
+.control-button--stop {
+  border-style: double;
+  border-width: 3px;
+  margin-left: auto;
+}
+.operator-provenance {
+  align-items: end;
+  border-top: 1px solid var(--cal-stone-800);
+  display: grid;
+  gap: 9px;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  padding-top: 10px;
+}
+.operator-provenance__note {
+  color: var(--cal-stone-600);
+  font-size: 7px;
+  grid-column: 1 / -1;
+  line-height: 1.5;
+}
+.operator-console__safety {
+  color: var(--cal-stone-500);
+  font-size: 8px;
+  grid-column: 1 / -1;
+}
+.operator-gate {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding: 9px 12px;
+}
+.operator-gate strong {
+  display: block;
+  font:
+    500 11px "IBM Plex Mono",
+    monospace;
+  margin-top: 3px;
+}
+.operator-gate__local {
+  align-items: end;
+  display: flex;
+  gap: 8px;
+}
+.operator-gate__local label {
+  color: var(--cal-stone-500);
+  font-size: 7px;
+  letter-spacing: 0.12em;
+}
+.operator-gate__local input {
+  background: var(--cal-stone-950);
+  border: 1px solid var(--cal-stone-600);
+  color: var(--cal-stone-100);
+  height: 34px;
+  width: 190px;
+}
+
+.dashboard-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: 300px 300px;
+}
+.primary-grid {
+  display: contents;
+}
+.live-instrument {
+  grid-column: 1 / 7;
+  grid-row: 1;
+  min-width: 0;
+}
+.stream-tape {
+  grid-column: 7 / 10;
+  grid-row: 1;
+  min-width: 0;
+}
+.comparison-section {
+  display: flex;
+  flex-direction: column;
+  grid-column: 10 / 13;
+  grid-row: 1;
+  margin: 0;
+  min-width: 0;
+}
+.flow-section {
+  grid-column: 1 / 7;
+  grid-row: 2;
+  margin: 0;
+  min-width: 0;
+}
+.recipes-section {
+  grid-column: 7 / 13;
+  grid-row: 2;
+  margin: 0;
+  min-width: 0;
+}
+.live-instrument__body {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  min-height: 250px;
+}
+.cylinder-station,
+.duty-station {
+  padding: 15px;
+  position: relative;
+}
+.cylinder-station {
+  border-right: 1px solid var(--cal-stone-700);
+}
+.cylinder-rig {
+  height: 178px;
+  margin: 0 auto;
+  position: relative;
+  transform: scale(0.78);
+  transform-origin: top center;
+  width: 170px;
+}
+.drip-line {
+  border-left: 5px double var(--cal-stone-500);
+  border-top: 5px double var(--cal-stone-500);
+  height: 68px;
+  left: 83px;
+  position: absolute;
+  top: -5px;
+  width: 68px;
+}
+.drip-line span {
+  background: var(--cal-stone-300);
+  border-radius: 50%;
+  bottom: -9px;
+  height: 5px;
+  left: -5px;
+  position: absolute;
+  width: 5px;
+}
+.cylinder {
+  border: 2px solid var(--cal-stone-300);
+  border-top: 0;
+  bottom: 34px;
+  height: 172px;
+  left: 45px;
+  overflow: hidden;
+  position: absolute;
+  width: 71px;
+}
+.cylinder::before {
+  border: 2px solid var(--cal-stone-300);
+  border-radius: 50%;
+  content: "";
+  height: 10px;
+  left: -2px;
+  position: absolute;
+  top: -5px;
+  width: 71px;
+  z-index: 2;
+}
+.cylinder__liquid {
+  background: var(--cal-stone-700);
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  transition: height 0.2s linear;
+  width: 100%;
+}
+.cylinder__liquid--live {
+  background: var(--cal-stone-500);
+}
+.cylinder__tick {
+  border-top: 1px solid var(--cal-stone-400);
+  color: var(--cal-stone-500);
+  font-size: 7px;
+  left: 0;
+  line-height: 0;
+  padding-left: 18px;
+  position: absolute;
+  width: 18px;
+  z-index: 3;
+}
+.scale-base {
+  background: var(--cal-stone-800);
+  border: 1px solid var(--cal-stone-500);
+  bottom: 16px;
+  height: 22px;
+  left: 22px;
+  position: absolute;
+  width: 120px;
+}
+.scale-base::before {
+  border: 1px solid var(--cal-stone-600);
+  content: "";
+  height: 6px;
+  left: -7px;
+  position: absolute;
+  top: -6px;
+  width: 134px;
+}
+.scale-base span {
+  color: var(--cal-stone-500);
+  display: block;
+  font-size: 6px;
+  letter-spacing: 0.08em;
+  padding-top: 7px;
+  text-align: center;
+}
+.primary-reading {
+  align-items: baseline;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+.primary-reading span {
+  font-family: "IBM Plex Serif", Georgia, serif;
+  font-size: 35px;
+}
+.primary-reading small {
+  color: var(--cal-stone-500);
+  font-size: 9px;
+}
+.reading-caption {
+  color: var(--cal-stone-600);
+  font-size: 7px;
+  margin-top: 5px !important;
+  text-align: center;
+}
+.analog-gauge svg {
+  display: block;
+  height: 155px;
+  margin: -8px auto -6px;
+  max-width: 330px;
+  width: 100%;
+}
+.gauge__rim {
+  fill: none;
+  stroke: var(--cal-stone-400);
+  stroke-width: 2;
+}
+.gauge__tick {
+  stroke: var(--cal-stone-400);
+  stroke-width: 1.5;
+}
+.gauge__number {
+  fill: var(--cal-stone-500);
+  font:
+    8px "IBM Plex Mono",
+    monospace;
+  text-anchor: middle;
+}
+.gauge__needle path {
+  fill: var(--cal-stone-500);
+}
+.gauge__needle--live path {
+  fill: var(--cal-stone-300);
+}
+.gauge__hub {
+  fill: var(--cal-stone-300);
+  stroke: var(--cal-stone-950);
+  stroke-width: 4;
+}
+.gauge__title {
+  fill: var(--cal-stone-500);
+  font:
+    8px "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.2em;
+  text-anchor: middle;
+}
+.status-lamp {
+  border: 1px solid var(--cal-stone-600);
+  color: var(--cal-stone-500);
+  font-size: 8px;
+  letter-spacing: 0.15em;
+  padding: 5px 7px;
+  text-transform: uppercase;
+}
+.status-lamp--live {
+  border-color: var(--cal-stone-400);
+  color: var(--cal-stone-300);
+}
+.live-readings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin: 10px 0 0;
+}
+.live-readings > div {
+  border-top: 1px solid var(--cal-stone-700);
+  padding: 7px;
+}
+.live-readings dt {
+  color: var(--cal-stone-600);
+  font-size: 7px;
+}
+.live-readings dd {
+  font-size: 10px;
+  margin: 3px 0 0;
+}
+
+.stream-tape {
+  min-height: 0;
+}
+.stream-tape__table {
+  padding: 8px 12px;
+}
+.stream-tape__row {
+  border-bottom: 1px solid var(--cal-stone-800);
+  display: grid;
+  font-size: 9px;
+  grid-template-columns: 0.7fr 1fr 1fr 1fr;
+  padding: 5px 2px;
+}
+.stream-tape__row span:not(:first-child) {
+  text-align: right;
+}
+.stream-tape__row--head {
+  color: var(--cal-stone-600);
+  font-size: 7px;
+}
+.stream-tape__empty {
+  color: var(--cal-stone-600);
+  font:
+    italic 14px "IBM Plex Serif",
+    Georgia,
+    serif;
+  padding: 60px 20px;
+  text-align: center;
+}
+.stream-tape footer {
+  color: var(--cal-stone-600);
+  display: flex;
+  font-size: 7px;
+  justify-content: space-between;
+  padding: 8px 12px;
+}
+
+.section-heading {
+  align-items: end;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 11px;
+}
+.section-heading h2 {
+  font-size: 27px;
+  margin-top: 3px;
+}
+.section-heading > p {
+  color: var(--cal-stone-500);
+  font-size: 8px;
+  line-height: 1.5;
+  max-width: 480px;
+  text-align: right;
+}
+.pump-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 1fr 1fr;
+}
+.pump-card {
+  display: grid;
+  grid-template-columns: minmax(190px, 0.75fr) 1fr;
+}
+.pump-card .instrument-card__heading {
+  grid-column: 1 / -1;
+}
+.pump-card__model {
+  color: var(--cal-stone-400);
+  font-size: 9px;
+  margin-top: 3px !important;
+}
+.pump-schematic {
+  align-self: center;
+  fill: none;
+  max-height: 120px;
+  padding: 13px;
+  stroke: var(--cal-stone-300);
+  stroke-linecap: square;
+  stroke-width: 1.4;
+  width: 100%;
+}
+.pump-schematic__fine {
+  stroke: var(--cal-stone-600);
+  stroke-width: 0.8;
+}
+.reading-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin: 0;
+}
+.reading-grid > div {
+  border-bottom: 1px solid var(--cal-stone-800);
+  border-left: 1px solid var(--cal-stone-700);
+  padding: 9px;
+}
+.reading-grid dt {
+  color: var(--cal-stone-600);
+  font-size: 7px;
+}
+.reading-grid dd {
+  font-size: 10px;
+  margin: 4px 0 0;
+}
+.missing-note {
+  border-top: 1px solid var(--cal-stone-700);
+  color: var(--cal-stone-500);
+  font-size: 8px;
+  grid-column: 1 / -1;
+  padding: 8px 11px;
+}
+
+.flow-chart-wrap {
+  padding: 8px 14px 11px;
+}
+.flow-chart {
+  display: block;
+  height: 223px;
+  width: 100%;
+}
+.flow-chart__grid {
+  stroke: var(--cal-stone-800);
+  stroke-width: 1;
+}
+.flow-chart__axis {
+  stroke: var(--cal-stone-400);
+  stroke-width: 1;
+}
+.flow-chart__tick {
+  fill: var(--cal-stone-500);
+  font:
+    8px "IBM Plex Mono",
+    monospace;
+}
+.flow-chart__series {
+  fill: none;
+  stroke: var(--cal-stone-100);
+  stroke-width: 2;
+}
+.flow-chart__series--dashed {
+  stroke-dasharray: 8 5;
+}
+.flow-chart__marker {
+  fill: var(--cal-stone-950);
+  stroke: var(--cal-stone-100);
+  stroke-width: 1.5;
+}
+.flow-chart__current {
+  stroke: var(--cal-stone-400);
+  stroke-dasharray: 2 3;
+  stroke-width: 2;
+}
+.flow-chart__empty text:first-child {
+  fill: var(--cal-stone-400);
+  font:
+    9px "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.18em;
+}
+.flow-chart__empty text:last-child {
+  fill: var(--cal-stone-600);
+  font:
+    italic 12px "IBM Plex Serif",
+    Georgia,
+    serif;
+}
+.flow-chart__label {
+  fill: var(--cal-stone-500);
+  font:
+    7px "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.15em;
+}
+.chart-legend {
+  color: var(--cal-stone-500);
+  display: flex;
+  font-size: 8px;
+  gap: 22px;
+  justify-content: center;
+}
+.chart-legend span {
+  align-items: center;
+  display: flex;
+  gap: 7px;
+}
+.legend-line {
+  border-top: 2px solid var(--cal-stone-100);
+  display: block;
+  width: 25px;
+}
+.legend-line--dashed {
+  border-top-style: dashed;
+}
+.legend-current {
+  border-top: 2px dotted var(--cal-stone-400);
+  display: block;
+  width: 25px;
+}
+
+.recipe-grid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 1fr 1fr;
+}
+.recipe-card {
+  align-items: stretch;
+  background: rgb(28 25 23 / 88%);
+  border: 1px solid var(--cal-stone-700);
+  display: grid;
+  grid-template-columns: 34px 1fr minmax(190px, 0.9fr);
+  min-height: 69px;
+}
+.recipe-card__number {
+  align-items: center;
+  border-right: 1px solid var(--cal-stone-700);
+  color: var(--cal-stone-600);
+  display: flex;
+  font:
+    19px "IBM Plex Serif",
+    Georgia,
+    serif;
+  justify-content: center;
+}
+.recipe-card__title {
+  align-self: center;
+  padding: 10px 12px;
+}
+.recipe-card__title h3 {
+  font-size: 17px;
+}
+.recipe-card__title p {
+  color: var(--cal-stone-600);
+  font-size: 7px;
+  line-height: 1.5;
+  margin-top: 5px;
+}
+.recipe-card__results {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.recipe-card__results > div {
+  border-left: 1px solid var(--cal-stone-700);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 8px 10px;
+}
+.recipe-card__results small {
+  color: var(--cal-stone-600);
+  font-size: 7px;
+}
+.recipe-card__results strong {
+  font:
+    22px "IBM Plex Serif",
+    Georgia,
+    serif;
+  margin-top: 2px;
+}
+.recipe-card__results span {
+  color: var(--cal-stone-600);
+  font-size: 6px;
+  margin-top: 2px;
+  text-transform: uppercase;
+}
+
+.calibration-footer {
+  border-top: 3px double var(--cal-stone-600);
+  color: var(--cal-stone-600);
+  display: flex;
+  font-size: 7px;
+  justify-content: space-between;
+  letter-spacing: 0.12em;
+  margin-top: 26px;
+  padding-top: 11px;
+}
+
+@media (min-width: 1101px) {
+  .calibration-shell {
+    padding-bottom: 14px;
+    padding-top: 14px;
+  }
+  .calibration-header {
+    padding-bottom: 10px;
+  }
+  .status-rail {
+    margin-bottom: 6px;
+  }
+  .status-rail > div {
+    padding-bottom: 5px;
+    padding-top: 5px;
+  }
+  .operator-gate {
+    margin-bottom: 6px;
+    padding-bottom: 5px;
+    padding-top: 5px;
+  }
+  .calibration-footer {
+    margin-top: 8px;
+    padding-top: 6px;
+  }
+  .simulation-banner {
+    font-size: 9px;
+    margin-bottom: 7px;
+    margin-top: -14px;
+    padding: 5px;
+  }
+  .comparison-section .section-heading {
+    align-items: start;
+    display: block;
+    margin-bottom: 6px;
+  }
+  .comparison-section .section-heading h2 {
+    font-size: 17px;
+    line-height: 1;
+  }
+  .comparison-section .section-heading > p {
+    display: none;
+  }
+  .comparison-section .pump-grid {
+    flex: 1;
+    gap: 6px;
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    min-height: 0;
+  }
+  .comparison-section .pump-card {
+    grid-template-columns: 105px 1fr;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    height: 100%;
+    min-height: 0;
+  }
+  .comparison-section .instrument-card__heading {
+    padding: 4px 7px 3px;
+  }
+  .comparison-section .instrument-card__heading h3 {
+    font-size: 14px;
+    line-height: 1;
+  }
+  .comparison-section .micro-label {
+    font-size: 6px;
+    line-height: 1;
+  }
+  .comparison-section .pump-card__model {
+    font-size: 5px;
+    margin-top: 1px !important;
+  }
+  .live-instrument .instrument-card__heading,
+  .flow-section .instrument-card__heading {
+    padding: 6px 8px 5px;
+  }
+  .live-instrument .instrument-card__heading h2,
+  .flow-section .instrument-card__heading h2 {
+    font-size: 16px;
+  }
+  .live-instrument__body {
+    height: 254px;
+    min-height: 0;
+  }
+  .cylinder-station,
+  .duty-station {
+    padding: 5px 7px;
+  }
+  .cylinder-rig {
+    height: 140px;
+    transform: scale(0.7);
+  }
+  .analog-gauge svg {
+    height: 104px;
+    margin: -8px auto -12px;
+  }
+  .primary-reading {
+    gap: 5px;
+  }
+  .primary-reading span {
+    font-size: 23px;
+  }
+  .primary-reading small {
+    font-size: 7px;
+  }
+  .reading-caption {
+    font-size: 5px;
+    margin-top: 2px !important;
+  }
+  .live-readings {
+    margin-top: 2px;
+  }
+  .live-readings > div {
+    padding: 4px;
+  }
+  .live-readings dt {
+    font-size: 5px;
+  }
+  .live-readings dd {
+    font-size: 7px;
+    margin-top: 2px;
+  }
+  .comparison-section .pump-schematic {
+    max-height: 38px;
+    padding: 2px 6px;
+  }
+  .comparison-section .reading-grid > div {
+    padding: 3px 5px;
+  }
+  .comparison-section .reading-grid dt {
+    font-size: 5px;
+  }
+  .comparison-section .reading-grid dd {
+    font-size: 7px;
+    margin-top: 1px;
+  }
+  .comparison-section .missing-note {
+    font-size: 5px;
+    padding: 3px 6px;
+  }
+  .comparison-section .etched-badge {
+    font-size: 6px;
+    padding: 3px 4px;
+  }
+  .recipes-section .section-heading {
+    margin-bottom: 6px;
+  }
+  .recipes-section .section-heading h2 {
+    font-size: 20px;
+  }
+  .recipes-section .section-heading > p {
+    font-size: 6px;
+    max-width: 300px;
+  }
+  .recipes-section .recipe-grid {
+    gap: 5px;
+  }
+  .recipes-section .recipe-card__title {
+    padding: 7px 8px;
+  }
+  .recipes-section .recipe-card__title h3 {
+    font-size: 13px;
+  }
+  .recipes-section .recipe-card__title p {
+    font-size: 5px;
+  }
+  .recipes-section .recipe-card__results > div {
+    padding: 5px 7px;
+  }
+  .recipes-section .recipe-card__results strong {
+    font-size: 17px;
+  }
+  .recipes-section .recipe-card__results small,
+  .recipes-section .recipe-card__results span {
+    font-size: 5px;
+  }
+  .flow-chart-wrap {
+    padding: 2px 10px 5px;
+  }
+  .flow-chart {
+    height: 198px;
+  }
+  .chart-legend {
+    font-size: 6px;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .dashboard-grid {
+    display: block;
+  }
+  .operator-console {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+  .operator-console__intro {
+    grid-column: span 2;
+  }
+  .operator-console__connection {
+    grid-column: span 1;
+  }
+  .primary-grid {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: 1fr;
+  }
+  .live-instrument,
+  .stream-tape,
+  .comparison-section,
+  .flow-section,
+  .recipes-section {
+    grid-column: auto;
+    grid-row: auto;
+    margin-top: 14px;
+  }
+  .pump-grid {
+    grid-template-columns: 1fr;
+  }
+  .recipe-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .calibration-header {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .connection-plate {
+    min-width: 0;
+  }
+  .status-rail {
+    grid-template-columns: 1fr 1fr;
+  }
+  .operator-console {
+    grid-template-columns: 1fr;
+  }
+  .operator-console > * {
+    grid-column: 1 !important;
+  }
+  .operator-actions {
+    flex-wrap: wrap;
+  }
+  .operator-provenance {
+    grid-template-columns: 1fr;
+  }
+  .control-button--stop {
+    margin-left: 0;
+  }
+  .live-instrument__body {
+    grid-template-columns: 1fr;
+  }
+  .cylinder-station {
+    border-bottom: 1px solid var(--cal-stone-700);
+    border-right: 0;
+  }
+  .pump-card {
+    grid-template-columns: 1fr;
+  }
+  .reading-grid > div {
+    border-left: 0;
+  }
+  .recipe-card {
+    grid-template-columns: 34px 1fr;
+  }
+  .recipe-card__results {
+    border-top: 1px solid var(--cal-stone-700);
+    grid-column: 1 / -1;
+  }
+  .section-heading {
+    align-items: start;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .section-heading > p {
+    text-align: left;
+  }
+  .calibration-footer {
+    flex-direction: column;
+    gap: 6px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cylinder__liquid {
+    transition: none;
+  }
+}

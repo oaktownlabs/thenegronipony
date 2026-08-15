@@ -149,3 +149,14 @@ vite.config.ts.timestamp-*
 .react-router/
 **/.react-router/
 site/build/
+
+# Wrangler local state and temporary bundles
+.wrangler/
+
+# Python calibration-tool caches
+__pycache__/
+*.py[cod]
+
+# Native calibration firmware test binaries
+firmware/calibration-bench/tests/calibration_bench_tests
+firmware/calibration-bench/tests/calibration_bench_adapter_tests

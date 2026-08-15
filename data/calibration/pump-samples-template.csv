@@ -1,0 +1,1 @@
+trial_id,device_id,boot_id,device_seq,event_sha256,stream_seq,step_index,device_ms,server_received_at,projected_at,state,pump_specimen_id,direction,acquisition_mode,expected_sample_interval_ms,duty_percent,duty_basis_points,duty_timer_count,motor_on,raw_adc,mass_g,tach_count,supply_voltage_v,faults

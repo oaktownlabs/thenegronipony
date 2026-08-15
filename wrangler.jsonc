@@ -1,10 +1,106 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "the-negroni-pony",
-  "compatibility_date": "2026-08-01",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-08-15",
+  "compatibility_flags": ["nodejs_compat"],
   "preview_urls": true,
   "assets": {
+    "binding": "ASSETS",
     "directory": "./site/build/client",
-    "not_found_handling": "single-page-application"
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*", "/calibration", "/calibration/*"]
+  },
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
+  "vars": {
+    "APP_ENV": "preview",
+    "MUTATIONS_ENABLED": "false"
+  },
+  "d1_databases": [],
+  "durable_objects": {
+    "bindings": []
+  },
+  "exports": {},
+  "env": {
+    "local": {
+      "name": "the-negroni-pony-local",
+      "vars": {
+        "APP_ENV": "local",
+        "AUTH_MODE": "local",
+        "MUTATIONS_ENABLED": "true",
+        "ACCESS_TEAM_DOMAIN": "",
+        "ACCESS_AUD": "",
+        "ALLOWED_ORIGIN": "http://localhost:8787",
+        "LOCAL_OPERATOR_TOKEN": ""
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "the-negroni-pony-calibration-local",
+          "migrations_dir": "migrations"
+        }
+      ],
+      "durable_objects": {
+        "bindings": [
+          {
+            "name": "BENCH_COORDINATOR",
+            "class_name": "BenchCoordinator"
+          }
+        ]
+      },
+      "exports": {
+        "BenchCoordinator": {
+          "type": "durable-object",
+          "storage": "sqlite"
+        }
+      }
+    },
+    "preview": {
+      "name": "the-negroni-pony-preview",
+      "vars": {
+        "APP_ENV": "preview",
+        "MUTATIONS_ENABLED": "false"
+      },
+      "d1_databases": [],
+      "durable_objects": {
+        "bindings": []
+      },
+      "exports": {}
+    },
+    "production": {
+      "name": "the-negroni-pony",
+      "vars": {
+        "APP_ENV": "production",
+        "AUTH_MODE": "access",
+        "MUTATIONS_ENABLED": "true",
+        "ACCESS_TEAM_DOMAIN": "",
+        "ACCESS_AUD": "",
+        "ALLOWED_ORIGIN": ""
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "the-negroni-pony-calibration",
+          "migrations_dir": "migrations"
+        }
+      ],
+      "durable_objects": {
+        "bindings": [
+          {
+            "name": "BENCH_COORDINATOR",
+            "class_name": "BenchCoordinator"
+          }
+        ]
+      },
+      "exports": {
+        "BenchCoordinator": {
+          "type": "durable-object",
+          "storage": "sqlite"
+        }
+      }
+    }
   }
 }

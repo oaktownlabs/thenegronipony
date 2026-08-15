@@ -6,6 +6,7 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLocation,
 } from 'react-router';
 import { SiteHeader } from '@/components/SiteHeader';
 import type { Route } from './+types/root';
@@ -30,7 +31,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <SiteHeader />
         {children}
         <ScrollRestoration />
         <Scripts />
@@ -40,10 +40,20 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  const { pathname } = useLocation();
+  const isCalibrationRoute = pathname === '/calibration' || pathname.startsWith('/calibration/');
+
+  return (
+    <>
+      {!isCalibrationRoute && <SiteHeader />}
+      <Outlet />
+    </>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
+  const { pathname } = useLocation();
+  const isCalibrationRoute = pathname === '/calibration' || pathname.startsWith('/calibration/');
   let title = 'Something spilled';
   let message = 'The page could not be rendered.';
 
@@ -53,6 +63,17 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
       error.status === 404 ? 'This placeholder is not wired up yet.' : error.statusText || message;
   } else if (import.meta.env.DEV && error instanceof Error) {
     message = error.message;
+  }
+
+  if (isCalibrationRoute) {
+    return (
+      <main className="calibration-error-shell">
+        <p>CALIBRATION BUREAU · FAULT</p>
+        <h1>{title}</h1>
+        <p>{message}</p>
+        <NavLink to="/calibration">Return to the bench</NavLink>
+      </main>
+    );
   }
 
   return (

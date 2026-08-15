@@ -23,6 +23,14 @@ claiming facts that have not been measured.
 The site does not need SSR, server actions, API routes, authentication, or
 runtime database access for Milestone 1.
 
+Milestone 2 introduces a specific runtime need for calibration only. Preserve
+the static SPA and `ssr: false`, then add Worker-first `/api/*` routes, deliberate
+`/calibration` header handling, D1, per-bench presence and per-trial Durable
+Objects, and Cloudflare Access on operator routes as specified in
+[calibration-software.md](calibration-software.md). Ordinary assets remain
+asset-first, remote PR previews are read-only, and staging/production bindings
+remain isolated.
+
 ## Cloudflare Build Settings
 
 Use the repository root as the Cloudflare project root so Wrangler is discovered
@@ -44,7 +52,9 @@ then discover the root `wrangler.jsonc` without extra flags.
 
 - `/` - project overview, current milestone status, launch-site section map.
 - `/build-log` - placeholder for milestones, decisions, failures, and review links.
-- `/calibration` - placeholder for pump calibration plans, CSV data, and charts.
+- `/calibration` - planned single-page bench operator/readout, live trial,
+  measured pump comparison, and six recipe predictions. It remains a
+  placeholder until the scoped calibration implementation PR.
 - `/open-source` - placeholder for source files, CAD, firmware, BOM, and safety notes.
 - `/media` - placeholder for hero assets, build media, and launch release queue.
 

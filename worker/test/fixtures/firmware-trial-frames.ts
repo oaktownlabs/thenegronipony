@@ -1,0 +1,228 @@
+import type { CompactSerialFrameV1 } from '../../../shared/calibration';
+
+export const FIXTURE_DEVICE_ID = 'pony-bench-uno-01';
+export const FIXTURE_BOOT_ID = '00000001';
+
+export type SensorFaultFixtureKind = 'maximum_mass' | 'mass_unavailable' | 'hx711_saturation';
+
+/** Exact compact AVR V1 shapes for one tare → run → complete sequence. */
+export function firmwareTrialFrames(trialId: string): CompactSerialFrameV1[] {
+  return [
+    {
+      v: 1,
+      t: 'state',
+      dev: FIXTURE_DEVICE_ID,
+      boot: FIXTURE_BOOT_ID,
+      seq: 2,
+      ms: 600,
+      state: 'tare',
+      trial: trialId,
+      step: null,
+      pump: 'none',
+      duty: 0,
+      zero: null,
+    },
+    {
+      v: 1,
+      t: 's',
+      dev: FIXTURE_DEVICE_ID,
+      boot: FIXTURE_BOOT_ID,
+      seq: 3,
+      ms: 700,
+      trial: trialId,
+      step: null,
+      state: 'tare',
+      pump: 'none',
+      raw: 100000,
+      mg: 0,
+      duty: 0,
+      tc: 0,
+      flags: 2,
+    },
+    {
+      v: 1,
+      t: 'state',
+      dev: FIXTURE_DEVICE_ID,
+      boot: FIXTURE_BOOT_ID,
+      seq: 4,
+      ms: 800,
+      state: 'armed',
+      trial: trialId,
+      step: null,
+      pump: 'none',
+      duty: 0,
+      zero: 100000,
+    },
+    {
+      v: 1,
+      t: 's',
+      dev: FIXTURE_DEVICE_ID,
+      boot: FIXTURE_BOOT_ID,
+      seq: 5,
+      ms: 900,
+      trial: trialId,
+      step: null,
+      state: 'armed',
+      pump: 'none',
+      raw: 100010,
+      mg: 10,
+      duty: 0,
+      tc: 0,
+      flags: 2,
+    },
+    {
+      v: 1,
+      t: 'state',
+      dev: FIXTURE_DEVICE_ID,
+      boot: FIXTURE_BOOT_ID,
+      seq: 6,
+      ms: 1000,
+      state: 'running',
+      trial: trialId,
+      step: 0,
+      pump: 'k',
+      duty: 5000,
+      zero: 100000,
+    },
+    {
+      v: 1,
+      t: 's',
+      dev: FIXTURE_DEVICE_ID,
+      boot: FIXTURE_BOOT_ID,
+      seq: 7,
+      ms: 1100,
+      trial: trialId,
+      step: 0,
+      state: 'running',
+      pump: 'k',
+      raw: 110000,
+      mg: 10000,
+      duty: 5000,
+      tc: 400,
+      flags: 3,
+    },
+    {
+      v: 1,
+      t: 'state',
+      dev: FIXTURE_DEVICE_ID,
+      boot: FIXTURE_BOOT_ID,
+      seq: 8,
+      ms: 6100,
+      state: 'settling',
+      trial: trialId,
+      step: 0,
+      pump: 'k',
+      duty: 5000,
+      zero: 100000,
+    },
+    {
+      v: 1,
+      t: 's',
+      dev: FIXTURE_DEVICE_ID,
+      boot: FIXTURE_BOOT_ID,
+      seq: 9,
+      ms: 6200,
+      trial: trialId,
+      step: 0,
+      state: 'settling',
+      pump: 'k',
+      raw: 150000,
+      mg: 50000,
+      duty: 5000,
+      tc: 0,
+      flags: 2,
+    },
+    {
+      v: 1,
+      t: 'state',
+      dev: FIXTURE_DEVICE_ID,
+      boot: FIXTURE_BOOT_ID,
+      seq: 10,
+      ms: 7100,
+      state: 'complete',
+      trial: trialId,
+      step: 0,
+      pump: 'k',
+      duty: 5000,
+      zero: 100000,
+    },
+  ];
+}
+
+/**
+ * Exact readScale() emission order around sensor-triggered fail-off:
+ * the triggering sample already reports FAULT with Timer1 disabled, followed
+ * by the context-bearing FAULT state and then the fault-code frame.
+ */
+export function firmwareSensorFaultFrames(
+  trialId: string,
+  kind: SensorFaultFixtureKind,
+  firstSeq: number,
+  firstDeviceMs: number,
+): CompactSerialFrameV1[] {
+  const runningFault = kind !== 'hx711_saturation';
+  const step: number | null = runningFault ? 0 : null;
+  const pump: 'k' | 'none' = runningFault ? 'k' : 'none';
+  const duty = runningFault ? 5000 : 0;
+  const raw = kind === 'maximum_mass' ? 350000 : kind === 'mass_unavailable' ? 150000 : 0x7fffff;
+  const massMg = kind === 'maximum_mass' ? 250000 : null;
+  const flags = massMg === null ? 0 : 2;
+
+  return [
+    {
+      v: 1,
+      t: 'state',
+      dev: FIXTURE_DEVICE_ID,
+      boot: FIXTURE_BOOT_ID,
+      seq: firstSeq,
+      ms: firstDeviceMs,
+      state: runningFault ? 'running' : 'tare',
+      trial: trialId,
+      step,
+      pump,
+      duty,
+      zero: runningFault ? 100000 : null,
+    },
+    {
+      v: 1,
+      t: 's',
+      dev: FIXTURE_DEVICE_ID,
+      boot: FIXTURE_BOOT_ID,
+      seq: firstSeq + 1,
+      ms: firstDeviceMs + 100,
+      trial: trialId,
+      step,
+      state: 'fault',
+      pump,
+      raw,
+      mg: massMg,
+      duty,
+      tc: 0,
+      flags,
+    },
+    {
+      v: 1,
+      t: 'state',
+      dev: FIXTURE_DEVICE_ID,
+      boot: FIXTURE_BOOT_ID,
+      seq: firstSeq + 2,
+      ms: firstDeviceMs + 100,
+      state: 'fault',
+      trial: trialId,
+      step,
+      pump,
+      duty,
+      zero: runningFault ? 100000 : null,
+    },
+    {
+      v: 1,
+      t: 'fault',
+      dev: FIXTURE_DEVICE_ID,
+      boot: FIXTURE_BOOT_ID,
+      seq: firstSeq + 3,
+      ms: firstDeviceMs + 100,
+      state: 'fault',
+      code: kind,
+    },
+  ];
+}

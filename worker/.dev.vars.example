@@ -1,0 +1,3 @@
+# Copy this value into a root `.dev.vars.local` file for `wrangler dev --env local`.
+# Use a high-entropy local-only value; never reuse a production credential.
+LOCAL_OPERATOR_TOKEN="replace-with-a-local-only-random-token"
