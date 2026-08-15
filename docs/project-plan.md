@@ -711,8 +711,11 @@ structure, and launch narrative before the next lab session.
 
 ### Milestone 2 — Calibration Harness Design
 
-Status: In review via Milestone 2 PR. Planning deliverables are drafted; pump
-and tubing selection remain open pending Adam/hardware confirmation.
+Status: In review via Milestone 2 PR. The plan now covers the physical bench,
+guarded firmware, USB bridge, Cloudflare ingestion/storage/realtime service,
+measured-only UI, and integrated acceptance. Physical-part identification,
+food-path selection, and external Cloudflare configuration remain explicit
+owner gates.
 
 #### Goal
 
@@ -721,7 +724,7 @@ lab.
 
 #### Tasks
 
-- [ ] Select pump candidates.
+- [x] Select pump candidates.
 - [ ] Select tubing candidates.
 - [x] Define calibration fixture requirements.
 - [x] Define bottle, tube, pump, cup, and scale layout.
@@ -729,17 +732,31 @@ lab.
 - [x] Draft calibration procedure.
 - [x] Draft repeatability and anti-drip test procedure.
 - [x] Draft flush and cleaning validation procedure.
-- [ ] Identify parts or tools needed before lab calibration.
+- [x] Identify parts or tools needed before lab calibration.
+- [x] Define proposed wiring, motor control, power protection, and interlocks.
+- [x] Define guarded calibration firmware and versioned serial protocol.
+- [x] Define browser bridge and offline/retry behavior.
+- [x] Define Cloudflare Worker, D1, Durable Object, authorization, and deployment plan.
+- [x] Define the single-page live readout and measured-only states.
+- [x] Define end-to-end automated and hardware-in-loop acceptance.
+- [ ] Close the owner gates in `docs/open-questions.md`.
 - [x] Plan calibration photos and video shots.
 
 #### Deliverables
 
 - `docs/fluid-system.md`
+- `docs/calibration-system-plan.md`
 - `docs/pump-calibration.md`
 - `docs/calibration-harness.md`
+- `docs/calibration-software.md`
+- `docs/calibration-ui.md`
+- `docs/open-questions.md`
 - `data/calibration/`
 - `scripts/calibration/`
-- Calibration data template
+- Trial, step-result, and raw-sample data templates
+- Calibration-screen visual contract derived from the supplied archive, with
+  fictional values and product photos lacking verified publication rights
+  excluded
 
 #### Media Capture Planning
 
@@ -752,19 +769,29 @@ lab.
 
 #### Goal
 
-Validate three-pump cocktail dispensing outside the sculpture once lab access is
-available.
+Implement the instrumented calibration system, compare the Kamoer and Gikfun
+specimens with real water data, and establish evidence suitable for choosing
+the eventual three machine channels.
 
 #### Entry Criteria
 
 - Calibration harness plan complete.
-- Pump and tubing candidates selected.
+- Pump candidates selected and received hardware identified.
 - Scale and test vessels available.
 - Calibration data schema ready.
+- Food-path tubing is not required for the first water-only qualification.
+- Cloudflare owner gates are closed or the run is explicitly local-only.
 
 #### Tasks
 
 - [ ] Build bench rig.
+- [ ] Implement and dry-test guarded calibration firmware.
+- [ ] Implement the Web Serial bridge and local spool.
+- [ ] Implement authenticated Cloudflare ingest, D1 storage, bench presence,
+  and per-trial live fanout.
+- [ ] Implement the measured-only `/calibration` page from the approved concept.
+- [ ] Pass synthetic, reconnect, duplicate, abort, and deployment tests.
+- [ ] Qualify the load-cell platform with reference masses.
 - [ ] Run water tests.
 - [ ] Run alcohol-safe fluid tests.
 - [ ] Test recipe ingredients.
@@ -775,10 +802,14 @@ available.
 - [ ] Test flush process.
 - [ ] Record calibration data.
 - [ ] Generate first calibration charts.
+- [ ] Publish reviewed curves and six recipe engineering estimates with provenance.
 
 #### Deliverables
 
 - Completed calibration datasets in `data/calibration/`
+- `firmware/calibration-bench/`
+- `worker/` and D1 migrations
+- Production calibration API and live page
 - Calibration scripts in `scripts/calibration/`
 - First calibration charts
 - `docs/pump-calibration.md` updated with results
