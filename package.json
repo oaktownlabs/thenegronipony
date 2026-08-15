@@ -23,7 +23,7 @@
     "cloudflare:types": "wrangler types worker-configuration.d.ts --env local",
     "cloudflare:dry-run": "pnpm build && wrangler deploy --dry-run --env local",
     "needful": "pnpm biome && pnpm typecheck && pnpm build && pnpm test",
-    "cloudflare:deploy": "pnpm build && wrangler deploy",
+    "cloudflare:deploy": "pnpm build && wrangler deploy --env production",
     "cloudflare:preview": "pnpm build && wrangler versions upload --env preview"
   },
   "dependencies": {

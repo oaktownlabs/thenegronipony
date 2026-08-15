@@ -177,7 +177,7 @@ load-cell calibration, liquid, tube, setup, and analysis version.
 
 ## 2026-08-01 - Build static assets in Cloudflare Workers Builds
 
-Status: Accepted
+Status: Amended by the 2026-08-15 safe-default environment decision below
 
 Context: Cloudflare's default production and preview deploy commands discover
 the root `wrangler.jsonc`, but the React site must be compiled before Wrangler
@@ -204,6 +204,32 @@ Cloudflare uploads a preview version. The build command remains a Cloudflare
 Workers Builds setting rather than Wrangler configuration, while
 `wrangler.jsonc` remains the source of truth for the Worker name and static
 asset directory.
+
+## 2026-08-15 - Make the default Worker upload read-only and resource-free
+
+Status: Accepted
+
+Context: Workers Builds uses `wrangler versions upload` without an environment
+flag for ordinary pull-request previews. The former root configuration carried
+unprovisioned production D1 and Durable Object bindings, so even a preview
+upload depended on resources that do not exist yet and widened the blast radius
+of an accidental default deployment.
+
+Decision: Keep the root Worker name `the-negroni-pony`, but make its runtime
+read-only and omit D1, Durable Object, and declarative Durable Object exports.
+Keep the explicit `preview` environment equally read-only and resource-free,
+and retain writable local bindings in `env.local`. Put production bindings,
+Access settings, and mutation enablement only in `env.production`, whose
+explicit name remains the existing `the-negroni-pony` service. Manual and
+connected production deploys must pass `--env production`; the default PR
+version upload intentionally passes no environment flag.
+
+Consequences: A default Workers Builds preview can bundle and upload the full
+site/API code without access to calibration storage or mutation coordination.
+Production writes cannot be enabled by config inheritance or an unqualified
+Wrangler command. Before production deployment, the owner must provision real
+resources, fill the production-only values, and update the connected Worker
+production deploy command to `pnpm exec wrangler deploy --env production`.
 
 ## 2026-06-08 - Use static React Router site on Cloudflare
 

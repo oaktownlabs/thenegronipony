@@ -113,12 +113,19 @@ configuration remains open.
   trial reads may include raw measurement samples and the state of rejected or
   aborted runs. Operator identity, private review notes, lease material, and
   ingest diagnostics remain private.
-- [ ] Provision separate staging and production D1 databases, Durable Object
-  namespaces, Access audiences, and secrets. R2 archive is deliberately
-  deferred until the first physical trial proves raw volume and export needs.
-- [ ] Enforce the selected deployment boundary: ordinary remote PR previews are
-  read-only, writable automated tests use local Cloudflare bindings, and only
-  the explicitly deployed staging environment may exercise remote mutations.
+- [x] **Configuration boundary:** the unnamed/default Worker configuration and
+  explicit `preview` environment are read-only and have no D1 or Durable Object
+  bindings. The writable local bindings live only in `env.local`; production
+  bindings and mutation settings live only in `env.production`.
+- [ ] Provision the production D1 database and Durable Object, then record the
+  real D1 ID, Access team domain/audience, allowed origin, and secrets in the
+  production environment. R2 archive is deliberately deferred until the first
+  physical trial proves raw volume and export needs.
+- [ ] **Connected-build release gate:** before allowing a production branch to
+  enable writes, set its Workers Builds deploy command to
+  `pnpm exec wrangler deploy --env production`. Keep the non-production branch
+  command on resource-free `pnpm exec wrangler versions upload`, and inspect
+  both effective configurations after saving the dashboard setting.
 - [x] **Hostname baseline:** serve `/calibration` and `/api/v1/*` from the same
   `the-negroni-pony` Worker origin. Set `ALLOWED_ORIGIN` to the final deployed
   origin before enabling mutations; a later custom hostname does not change the

@@ -932,22 +932,31 @@ Root `wrangler.jsonc` remains the source of truth. Implementation must:
 - generate Worker types after binding changes;
 - configure `assets.run_worker_first` explicitly and fail closed when a required
   runtime binding is absent;
-- keep ordinary remote PR previews read-only;
+- keep the unnamed/default configuration and explicit `preview` environment
+  read-only and resource-free so a default PR `versions upload` cannot reach D1
+  or a Durable Object;
 - run mutation/integration tests locally with the Cloudflare Vitest pool and
-  Miniflare bindings;
-- use one explicitly deployed staging environment for remote end-to-end trials,
-  never an arbitrary PR preview;
-- give staging its own D1/DO IDs, Access audience, secrets, and build namespace;
-- omit production ingest secrets from previews and staging; and
+  Miniflare bindings from the writable `local` environment;
+- keep D1, Durable Object, Access, origin, and mutation settings only in the
+  explicit `production` environment;
+- use an explicitly provisioned environment for any future remote end-to-end
+  trials, never an arbitrary PR preview;
+- omit production credentials from the default, preview, and local
+  environments; and
 - apply backward-compatible migrations before deploying code that requires
   them.
 
-Workers Builds retains root `/`, `pnpm build`, production `wrangler deploy`, and
-non-production version upload. CI resolves and inspects the effective config:
-production IDs/audiences are forbidden outside production, missing bindings
-fail closed, and no mutation smoke test targets a PR URL. If per-PR writable
-previews are ever required, provision disposable resources per PR and destroy
-them after the branch closes; do not share one writable dataset across builds.
+Workers Builds retains root `/` and `pnpm build`. Its production deploy command
+must be set explicitly to `pnpm exec wrangler deploy --env production` before
+writes are enabled. The non-production branch command deliberately remains the
+default `pnpm exec wrangler versions upload`, which selects the resource-free
+root configuration. `pnpm cloudflare:preview` remains available for a manual
+upload to the separate, equally read-only `preview` Worker. CI resolves and
+inspects each effective config: production IDs/audiences are forbidden outside
+production, missing bindings fail closed, and no mutation smoke test targets a
+PR URL. If per-PR writable previews are ever required, provision disposable
+resources per PR and destroy them after the branch closes; do not share one
+writable dataset across builds.
 
 ## Automated and Integration Tests
 
