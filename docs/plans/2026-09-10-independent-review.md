@@ -58,7 +58,7 @@ the full workflow and heartbeat against a real PR before marking activation done
 - [x] Requirements approved and repository baselines inspected.
 - [x] Process, reviewer boundaries, and account activation steps specified.
 - [x] Repository changes and local contract tests complete.
-- [ ] PR opened with local verification evidence.
+- [x] PR opened with local verification evidence.
 - [ ] Adam's subscription and model configuration verified.
 - [ ] Workflow merged/activated and full live loop verified.
 - [ ] Heartbeat verified to stop when waiting on Adam.
@@ -87,6 +87,12 @@ the full workflow and heartbeat against a real PR before marking activation done
 - Financial PR #1 must land before the financial workflow can be activated.
 
 ## Open questions and remaining gates
+
+Rollout PRs: [Serenity #287](https://github.com/oaktownlabs/serenity/pull/287),
+[ChatLFT #8](https://github.com/oaktownlabs/chatlft/pull/8),
+[financial model #6](https://github.com/oaktownlabs/smeepsadamsfinancials/pull/6),
+[Grifterbots #1](https://github.com/oaktownlabs/grifterbots/pull/1), and
+[The Negroni Pony #27](https://github.com/oaktownlabs/thenegronipony/pull/27).
 
 Adam owns login and account/model eligibility. Required-check/ruleset activation
 and live review/heartbeat evidence remain pending. Escalate blockers in Codex,
