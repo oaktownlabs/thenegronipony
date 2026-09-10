@@ -1,0 +1,29 @@
+name: Review workflow tests
+
+on:
+  pull_request:
+    paths:
+      - '.github/**'
+      - 'AGENTS.md'
+      - 'CLAUDE.md'
+      - 'docs/development-workflow.md'
+      - 'docs/plans/**'
+  push:
+    branches: [main]
+    paths:
+      - '.github/**'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test .github/review/review.contract.mjs

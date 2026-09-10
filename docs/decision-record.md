@@ -1,5 +1,28 @@
 # Decision Record
 
+## 2026-09-10 — Independent Claude review, Codex implementation
+
+Status: accepted by Adam in the requirements interview.
+
+Context: Adam wants to specify behavior and assess results in Codex while agents
+handle implementation and independent technical review.
+
+Decision: Codex owns every code/document change; Claude reviews every PR and
+revision, including architecture, with all style delegated to linting. Adam owns
+merges. Two rounds of unresolved disagreement escalate to Adam. Five-minute
+Codex heartbeats run only while waiting on CI/Claude, never while awaiting Adam.
+Maintain architecture, decision logs, and execution plans for multi-PR work.
+
+Alternatives considered: manual code review by Adam; a local Claude daemon;
+a separate issue tracker; API-billed agents. The selected workflow runs Claude
+Code in GitHub Actions with subscription OAuth and an explicit eligible model.
+
+Consequences: independent review remains dependent on account eligibility and
+successful verification. Failed/incomplete/stale reviews block readiness.
+Previews must be checked, repaired where possible, and escalated if unresolved.
+Documentation and operating details: [development workflow](development-workflow.md).
+Account setup and live activation are pending, not proven by the code rollout.
+
 This file tracks important project decisions. Add entries newest first.
 
 ## 2026-06-08 - Move site and calibration planning before lab work
