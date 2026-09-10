@@ -1,5 +1,35 @@
 # AGENTS.md
 
+## Development and review contract
+
+Follow [the development workflow](docs/development-workflow.md) for every change.
+It governs delivery and review throughout this repository, including directories
+with scoped AGENTS.md files. Scoped engineering and data-safety rules still apply.
+
+- Interview Adam, capture requirements and acceptance criteria, and wait for his
+  explicit go-ahead before implementation. Do not repeatedly re-request approval
+  for work already authorized.
+- Codex implements and changes documentation; Claude independently reviews.
+  Claude must never edit files. Adam alone merges and archives the Codex task.
+- Claude reviews every PR and new revision, including drafts, bots, and fixups:
+  correctness, security, requirements, verification, and consequential architecture.
+  Automated linting/formatting exclusively owns style; no style review by Claude.
+- Keep [architecture](docs/architecture.md) and [decisions](docs/decision-record.md) current.
+  For multi-PR work, maintain an approved execution plan in docs/plans/ and link
+  the relevant slice in every PR. Existing [product plans](docs/project-plan.md) remain
+  canonical. A small fix may keep its plan in the PR description.
+- After two rounds of unresolved disagreement on a finding, escalate in the
+  original Codex task with both positions, evidence, and a recommendation.
+- While waiting on CI or Claude, use a native five-minute heartbeat in that
+  same task. Check compact metadata before reading detailed feedback. Pause or
+  delete the heartbeat BEFORE asking Adam or handing off. Never poll while
+  waiting on Adam. Never merge automatically.
+- For web features, verify previews and make a best effort to fix broken ones.
+  Escalate unresolved preview failures. Handoff includes current-commit review,
+  CI/acceptance evidence, preview links/screenshots, and explicit limitations.
+- Never treat failed/skipped/incomplete review, stale approval, or unavailable
+  evidence as successful verification. Login and quota failures go to Adam.
+
 Guidance for Codex and other automated contributors working on The Negroni Pony.
 
 ## Project Voice
